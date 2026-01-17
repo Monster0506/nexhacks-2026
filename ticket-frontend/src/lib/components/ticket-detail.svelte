@@ -173,7 +173,6 @@
             </button>
           </div>
         {/if}
-        <p class="text-sm text-muted-foreground leading-relaxed">{ticket.description}</p>
       </div>
       
       <div class="space-y-4">
