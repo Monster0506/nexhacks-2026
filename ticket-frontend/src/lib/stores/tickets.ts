@@ -5,6 +5,7 @@ import {
   assignTicket,
   releaseTicket,
   createTicket as apiCreateTicket,
+  deleteTicket as apiDeleteTicket,
   type BackendTicket
 } from "../api/client"
 import { websocket, type TicketEvent } from "../api/websocket"
@@ -269,10 +270,12 @@ export const currentAgent: Writable<string | null> = currentAgentWritable
 // Derived stores
 export const ticketsByStatus: Readable<Record<TicketStatus, Ticket[]>> = derived(ticketsWritable, ($tickets: Ticket[]) => {
   return {
-    open: $tickets.filter((t: Ticket) => t.status === 'open'),
+    inbox: $tickets.filter((t: Ticket) => t.status === 'inbox'),
+    triage_pending: $tickets.filter((t: Ticket) => t.status === 'triage_pending'),
+    assigned: $tickets.filter((t: Ticket) => t.status === 'assigned'),
     in_progress: $tickets.filter((t: Ticket) => t.status === 'in_progress'),
-    review: $tickets.filter((t: Ticket) => t.status === 'review'),
-    done: $tickets.filter((t: Ticket) => t.status === 'done'),
+    resolved: $tickets.filter((t: Ticket) => t.status === 'resolved'),
+    closed: $tickets.filter((t: Ticket) => t.status === 'closed'),
   }
 })
 
@@ -311,6 +314,8 @@ export async function updateTicketStatus(ticketId: string, newStatus: TicketStat
 
   if (!ticket) return
 
+  const oldStatus = ticket.status
+
   // Optimistically update local state
   ticketsWritable.update((items: Ticket[]) =>
     items.map((t: Ticket) =>
@@ -320,8 +325,20 @@ export async function updateTicketStatus(ticketId: string, newStatus: TicketStat
     )
   )
 
-  // Note: Full status changes require queue moves which need backend coordination
-  // For now, we just update locally - the backend sync will happen via WebSocket
+  try {
+    // Sync to backend - convert to uppercase for backend enum format
+    await apiUpdateTicket(ticketId, { status: newStatus.toUpperCase() })
+  } catch (e) {
+    console.error('Failed to update status:', e)
+    // Rollback on failure
+    ticketsWritable.update((items: Ticket[]) =>
+      items.map((t: Ticket) =>
+        t.id === ticketId
+          ? { ...t, status: oldStatus, updatedAt: new Date().toISOString() }
+          : t
+      )
+    )
+  }
 }
 
 export async function updateTicketPriority(ticketId: string, newPriority: TicketPriority): Promise<void> {
@@ -380,6 +397,20 @@ export async function releaseTicketFromAgent(ticketId: string, agentId: string):
     )
   } catch (e) {
     console.error('Failed to release ticket:', e)
+  }
+}
+
+export async function deleteTicket(ticketId: string): Promise<void> {
+  try {
+    await apiDeleteTicket(ticketId)
+
+    // Remove from local state
+    ticketsWritable.update((items: Ticket[]) =>
+      items.filter((t: Ticket) => t.id !== ticketId)
+    )
+  } catch (e) {
+    console.error('Failed to delete ticket:', e)
+    throw e
   }
 }
 
