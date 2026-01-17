@@ -23,10 +23,11 @@
   }
   
   const statuses: StatusOption[] = [
-    { id: 'open', label: 'Open' },
+    { id: 'inbox', label: 'Inbox' },
+    { id: 'triage_pending', label: 'Triage' },
+    { id: 'assigned', label: 'Assigned' },
     { id: 'in_progress', label: 'In Progress' },
-    { id: 'review', label: 'Review' },
-    { id: 'done', label: 'Done' }
+    { id: 'resolved', label: 'Resolved' }
   ];
   
   const priorityStyles: Record<TicketPriority, string> = {
@@ -123,6 +124,8 @@
   
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 space-y-6">
+
+      <!-- Title + Edit Title -->
       <div>
         {#if isEditingTitle}
           <div class="flex items-center gap-2 mb-2">
@@ -156,6 +159,8 @@
         {:else}
           <div class="flex items-start justify-between gap-2 mb-2">
             <h2 class="text-lg font-semibold text-foreground">{ticket.title}</h2>
+            
+            <!-- Edit Title Button -->
             <button
               type="button"
               onclick={handleEditTitle}
