@@ -19,6 +19,7 @@ from .content import (
     content_from_dict,
 )
 from .ticket import Ticket, InvalidStateTransitionError
+from .user import User
 
 __all__ = [
     # Enums
@@ -42,4 +43,6 @@ __all__ = [
     # Ticket
     "Ticket",
     "InvalidStateTransitionError",
+    # User
+    "User",
 ]
