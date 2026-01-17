@@ -113,6 +113,7 @@ export async function addTicket(
   category?: string,
   tags?: string[]
 ): Promise<string> {
+  console.log("desc:", description);
   try {
     const metadata: any = {
       priority: priority.toUpperCase(),
@@ -182,13 +183,18 @@ function transformBackendTicket(backendTicket: BackendTicket): Ticket {
   }
 
   // Extract description from content
-  let description = ''
+  let description = ""
   if (content.body) {
     description = content.body
   } else if (content.issue_body) {
     description = content.issue_body
   } else if (content.message_text) {
     description = content.message_text
+  } else if ('form_fields' in content && typeof content.form_fields === 'object' && content.form_fields !== null) {
+    const formFields = content.form_fields as Record<string, any>
+    if ('description' in formFields && typeof formFields.description === 'string') {
+      description = formFields.description
+    }
   }
 
   // Build assignee object if present
