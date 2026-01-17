@@ -2,7 +2,7 @@
  * API Client for the Ticket Management Backend
  */
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '';
 
 // Types matching backend models
 export interface BackendTicket {
@@ -83,22 +83,22 @@ export async function fetchTickets(filters?: {
 
   const url = `${API_BASE_URL}/api/tickets${params.toString() ? '?' + params.toString() : ''}`;
   const response = await fetch(url);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch tickets: ${response.statusText}`);
   }
-  
+
   const data = await response.json();
   return data.tickets;
 }
 
 export async function fetchTicket(ticketId: string): Promise<BackendTicket> {
   const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch ticket: ${response.statusText}`);
   }
-  
+
   const data = await response.json();
   return data.ticket;
 }
@@ -115,22 +115,22 @@ export async function updateTicket(ticketId: string, updates: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updates),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to update ticket: ${response.statusText}`);
   }
-  
+
   const data = await response.json();
   return data.ticket;
 }
 
 export async function fetchQueues(): Promise<{ queues: QueueStats[]; total_tickets: number }> {
   const response = await fetch(`${API_BASE_URL}/api/queues`);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch queues: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -140,11 +140,11 @@ export async function fetchQueueDetails(queueName: string, limit = 20): Promise<
   tickets: BackendTicket[];
 }> {
   const response = await fetch(`${API_BASE_URL}/api/queues/${queueName}?limit=${limit}`);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch queue details: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -164,7 +164,7 @@ export async function moveTicket(
       reason,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to move ticket: ${response.statusText}`);
   }
@@ -184,11 +184,11 @@ export async function claimTicket(agentId: string, options?: {
       ...options,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to claim ticket: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -206,11 +206,11 @@ export async function assignTicket(
       reason,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to assign ticket: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -228,11 +228,11 @@ export async function releaseTicket(
       reason,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to release ticket: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -252,11 +252,11 @@ export async function transferTicket(
       reason,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to transfer ticket: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -272,11 +272,11 @@ export async function getAvailableTickets(options?: {
 
   const url = `${API_BASE_URL}/api/distribution/available${params.toString() ? '?' + params.toString() : ''}`;
   const response = await fetch(url);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to get available tickets: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -286,11 +286,11 @@ export async function getMyTickets(agentId: string): Promise<{
   count: number;
 }> {
   const response = await fetch(`${API_BASE_URL}/api/distribution/my-tickets?agent_id=${agentId}`);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to get agent tickets: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -304,11 +304,11 @@ export async function getAgentStats(agentId: string): Promise<{
   };
 }> {
   const response = await fetch(`${API_BASE_URL}/api/distribution/agent-stats/${agentId}`);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to get agent stats: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -330,10 +330,10 @@ export async function createTicket(ticketData: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(ticketData),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to create ticket: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
