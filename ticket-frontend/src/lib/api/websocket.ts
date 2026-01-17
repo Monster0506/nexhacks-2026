@@ -4,7 +4,10 @@
 
 import { writable, type Writable } from 'svelte/store';
 
-const WS_URL = 'ws://localhost:8000/ws';
+// Use current host for WebSocket connection (works in both dev and production)
+const WS_HOST = typeof window !== 'undefined' ? window.location.host : 'localhost:8000';
+const WS_PROTOCOL = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_URL = `${WS_PROTOCOL}//${WS_HOST}/ws`;
 
 export type WebSocketStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
