@@ -105,7 +105,7 @@
   <div class="flex items-center gap-6">
     <div class="flex items-center gap-4 text-sm">
       <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-foreground"></span>
+        <span class="w-2 h-2 rounded-full bg-muted-foreground"></span>
         <span class="text-muted-foreground">{stats.inbox} Inbox</span>
       </div>
       <div class="flex items-center gap-2">
@@ -113,12 +113,8 @@
         <span class="text-muted-foreground">{stats.assigned} Assigned</span>
       </div>
       <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-warning"></span>
+        <span class="w-2 h-2 rounded-full bg-accent"></span>
         <span class="text-muted-foreground">{stats.inProgress} In Progress</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-muted-foreground"></span>
-        <span class="text-muted-foreground">{stats.total} Total</span>
       </div>
       {#if stats.critical > 0}
         <div class="flex items-center gap-2">
@@ -126,6 +122,10 @@
           <span class="text-destructive">{stats.critical} Critical</span>
         </div>
       {/if}
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-muted-foreground"></span>
+        <span class="text-muted-foreground">{stats.total} Total</span>
+      </div>
     </div>
     
     <!-- Search and Plus Icon -->

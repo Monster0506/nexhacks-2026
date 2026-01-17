@@ -23,10 +23,11 @@
   }
   
   const statuses: StatusOption[] = [
-    { id: 'open', label: 'Open' },
+    { id: 'inbox', label: 'Inbox' },
+    { id: 'triage_pending', label: 'Triage' },
+    { id: 'assigned', label: 'Assigned' },
     { id: 'in_progress', label: 'In Progress' },
-    { id: 'review', label: 'Review' },
-    { id: 'done', label: 'Done' }
+    { id: 'resolved', label: 'Resolved' }
   ];
   
   const priorityStyles: Record<TicketPriority, string> = {

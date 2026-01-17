@@ -29,10 +29,10 @@ export interface AIReasoning {
 }
 
 // Backend status types matching the backend enums
-export type BackendTicketStatus = "INBOX" | "TRIAGE_PENDING" | "ASSIGNED" | "IN_PROGRESS" | "RESOLVED" | "CLOSED"
+export type BackendTicketStatus = "INBOX" | "TRIAGE_PENDING" | "ASSIGNED" | "IN_PROGRESS" | "RESOLVED"
 
 // Frontend status maps to backend status
-export type TicketStatus = "inbox" | "triage_pending" | "assigned" | "in_progress" | "resolved" | "closed"
+export type TicketStatus = "inbox" | "triage_pending" | "assigned" | "in_progress" | "resolved"
 export type TicketPriority = "low" | "medium" | "high" | "critical"
 
 export interface Ticket {
@@ -76,8 +76,6 @@ export function getStatusLabel(status: TicketStatus): string {
       return 'In Progress'
     case 'resolved':
       return 'Resolved'
-    case 'closed':
-      return 'Closed'
     default:
       return status
   }
@@ -96,8 +94,6 @@ export function getStatusColor(status: TicketStatus): string {
       return 'bg-purple-500/10 text-purple-500'
     case 'resolved':
       return 'bg-green-500/10 text-green-500'
-    case 'closed':
-      return 'bg-gray-500/10 text-gray-500'
     default:
       return 'bg-muted text-muted-foreground'
   }
