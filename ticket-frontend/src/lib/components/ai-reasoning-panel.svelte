@@ -4,16 +4,21 @@
   
   interface Props {
     reasoning: AIReasoning;
-    onfoo?: () => void; // Example of callback prop for event handling
+    status: string; // Add status prop
+    onfoo?: () => void;
   }
   
-  let { reasoning, onfoo }: Props = $props();
+  let { reasoning, status, onfoo }: Props = $props();
   let isExpanded = true;
-  let visibleSteps = 0;
+  // If not triaging, show all steps immediately (no processing animation)
+  let visibleSteps = status === 'triaging' ? 0 : (reasoning.steps?.length || 0);
   
   $effect(() => {
     if (!isExpanded) {
       visibleSteps = 0;
+    } else if (status !== 'triaging') {
+       // If we expand and it's done, show all
+       visibleSteps = reasoning.steps?.length || 0;
     }
   });
   
@@ -115,7 +120,7 @@
         {/if}
       {/each}
       
-      {#if visibleSteps < reasoning.steps.length}
+      {#if status === 'triaging' || visibleSteps < reasoning.steps.length}
         <div class="flex items-center gap-2 pl-9 py-2" transition:fade>
           <div class="flex gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style="animation-delay: 0ms"></span>

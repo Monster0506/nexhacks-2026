@@ -117,6 +117,8 @@ class EventPublisher:
 
     async def publish_coding_agent_trigger(self, ticket: Ticket) -> None:
         """Trigger n8n webhook for coding agent when a ticket has coding tags """
+        print(f"Triggering coding agent for ticket {ticket.id} (Priority: {ticket.priority.value})")
+        
         payload = {
             "ticket_id": ticket.id,
             "tags": ticket.tags,

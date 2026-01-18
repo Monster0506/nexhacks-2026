@@ -232,6 +232,9 @@ async def ingest_ticket(
         priority=priority,
         tags=tags,
     )
+    
+    # Set status to TRIAGING for immediate feedback
+    ticket.status = TicketStatus.TRIAGING
 
     # Allow optional title coming from metadata or payload (useful for form submissions)
     # Priority: metadata.title -> payload.fields.subject -> payload.fields.title -> payload.fields.message

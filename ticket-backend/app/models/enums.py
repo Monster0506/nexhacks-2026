@@ -6,10 +6,12 @@ from enum import Enum
 class TicketStatus(str, Enum):
     """Status of a ticket in the system."""
     INBOX = "INBOX"
+    TRIAGING = "TRIAGING"
     TRIAGE_PENDING = "TRIAGE_PENDING"
     ASSIGNED = "ASSIGNED"
     IN_PROGRESS = "IN_PROGRESS"
     RESOLVED = "RESOLVED"
+    CLOSED = "CLOSED"
 
 
 class TicketPriority(str, Enum):
@@ -58,11 +60,13 @@ class AutoResolveAction(str, Enum):
 
 # Valid state transitions for tickets
 VALID_TRANSITIONS: dict[TicketStatus, list[TicketStatus]] = {
-    TicketStatus.INBOX: [TicketStatus.TRIAGE_PENDING],
-    TicketStatus.TRIAGE_PENDING: [TicketStatus.ASSIGNED, TicketStatus.RESOLVED],
-    TicketStatus.ASSIGNED: [TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED, TicketStatus.INBOX],
-    TicketStatus.IN_PROGRESS: [TicketStatus.RESOLVED, TicketStatus.ASSIGNED, TicketStatus.INBOX],
-    TicketStatus.RESOLVED: [TicketStatus.IN_PROGRESS],  # Can reopen if needed, otherwise terminal
+    TicketStatus.INBOX: [TicketStatus.TRIAGING, TicketStatus.TRIAGE_PENDING],
+    TicketStatus.TRIAGING: [TicketStatus.TRIAGE_PENDING, TicketStatus.ASSIGNED, TicketStatus.RESOLVED],
+    TicketStatus.TRIAGE_PENDING: [TicketStatus.ASSIGNED, TicketStatus.RESOLVED, TicketStatus.CLOSED],
+    TicketStatus.ASSIGNED: [TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED, TicketStatus.INBOX, TicketStatus.CLOSED],
+    TicketStatus.IN_PROGRESS: [TicketStatus.RESOLVED, TicketStatus.ASSIGNED, TicketStatus.INBOX, TicketStatus.CLOSED],
+    TicketStatus.RESOLVED: [TicketStatus.IN_PROGRESS, TicketStatus.CLOSED],  # Can reopen if needed
+    TicketStatus.CLOSED: [TicketStatus.INBOX], # Can reopen
 }
 
 

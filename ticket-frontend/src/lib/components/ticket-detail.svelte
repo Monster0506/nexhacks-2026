@@ -349,7 +349,7 @@
       
       <!-- Ai Reasoning Part -->
       {#if ticket.aiReasoning}
-        <AiReasoningPanel reasoning={ticket.aiReasoning} />
+        <AiReasoningPanel reasoning={ticket.aiReasoning} status={ticket.status} />
       {/if}
     </div>
   </div>
