@@ -19,7 +19,9 @@ from app.models import (
     EmailContent,
     DiscordContent,
     GitHubContent,
+    GitHubContent,
     FormContent,
+    SMSContent,
 )
 from app.storage import ticket_repository
 from app.queues import queue_manager
@@ -78,6 +80,19 @@ class FormPayload(BaseModel):
     form_id: Optional[str] = None
     submitter_email: Optional[str] = None
     submitter_name: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+
+class SMSPayload(BaseModel):
+    """SMS content payload (e.g. from Twilio)."""
+
+    sender: str = Field(..., alias="From")
+    recipient: str = Field(..., alias="To")
+    body: str = Field(..., alias="Body")
+    message_sid: Optional[str] = Field(None, alias="MessageSid")
+    timestamp: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -219,6 +234,20 @@ def create_content_from_payload(content_type: str, payload: dict[str, Any]):
             form_id=payload.get("form_id", payload.get("id")),
             submitter_email=payload.get("submitter_email"),
             submitter_name=payload.get("submitter_name", payload.get("user")),
+        )
+    elif content_type == "sms":
+        return SMSContent(
+            sender_phone_number=payload.get(
+                "From", payload.get("sender", payload.get("subject", ""))
+            ),
+            recipient_phone_number=payload.get(
+                "To", payload.get("recipient", payload.get("user", ""))
+            ),
+            message_body=payload.get("Body", payload.get("body", "")),
+            timestamp=parse_timestamp(payload.get("timestamp")),
+            message_sid=payload.get(
+                "MessageSid", payload.get("message_id", payload.get("id"))
+            ),
         )
     else:
         raise ValueError(f"Unknown content type: {content_type}")

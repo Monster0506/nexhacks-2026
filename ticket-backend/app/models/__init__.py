@@ -16,6 +16,7 @@ from .content import (
     DiscordContent,
     GitHubContent,
     FormContent,
+    SMSContent,
     content_from_dict,
 )
 from .ticket import Ticket, InvalidStateTransitionError
@@ -39,6 +40,7 @@ __all__ = [
     "DiscordContent",
     "GitHubContent",
     "FormContent",
+    "SMSContent",
     "content_from_dict",
     # Ticket
     "Ticket",

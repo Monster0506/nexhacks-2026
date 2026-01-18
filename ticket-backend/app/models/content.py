@@ -395,6 +395,87 @@ class FormContent(TicketContent):
         )
 
 
+class SMSContent(TicketContent):
+    """Content from SMS messages."""
+
+    def __init__(
+        self,
+        sender_phone_number: str,
+        message_body: str,
+        timestamp: datetime,
+        message_sid: Optional[str] = None,
+    ):
+        self._sender_phone_number = sender_phone_number
+        self._recipient_phone_number = recipient_phone_number
+        self._message_body = message_body
+        self._timestamp = timestamp
+        self._message_sid = message_sid
+
+    @property
+    def raw_content(self) -> str:
+        return self._message_body
+
+    @property
+    def sender(self) -> str:
+        return self._sender_phone_number
+
+    @property
+    def timestamp(self) -> datetime:
+        return self._timestamp
+
+    @property
+    def metadata(self) -> dict[str, Any]:
+        return {
+            "recipient_phone_number": self._recipient_phone_number,
+            "message_sid": self._message_sid,
+        }
+
+    @property
+    def sender_phone_number(self) -> str:
+        return self._sender_phone_number
+    
+    @property
+    def recipient_phone_number(self) -> str:
+        return self._recipient_phone_number
+
+    @property
+    def message_body(self) -> str:
+        return self._message_body
+    
+    @property
+    def message_sid(self) -> Optional[str]:
+        return self._message_sid
+
+    def extract_body(self) -> str:
+        return self._message_body
+
+    def extract_attachments(self) -> list[dict[str, Any]]:
+        return []
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": "sms",
+            "sender_phone_number": self._sender_phone_number,
+            "recipient_phone_number": self._recipient_phone_number,
+            "message_body": self._message_body,
+            "timestamp": self._timestamp.isoformat(),
+            "message_sid": self._message_sid,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "SMSContent":
+        timestamp = data.get("timestamp")
+        if isinstance(timestamp, str):
+            timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        return cls(
+            sender_phone_number=data["sender_phone_number"],
+            recipient_phone_number=data["recipient_phone_number"],
+            message_body=data["message_body"],
+            timestamp=timestamp,
+            message_sid=data.get("message_sid"),
+        )
+
+
 def content_from_dict(data: dict[str, Any]) -> TicketContent:
     """Factory function to create the appropriate content type from a dictionary."""
     content_type = data.get("type", "").lower()
@@ -407,5 +488,7 @@ def content_from_dict(data: dict[str, Any]) -> TicketContent:
         return GitHubContent.from_dict(data)
     elif content_type == "form":
         return FormContent.from_dict(data)
+    elif content_type == "sms":
+        return SMSContent.from_dict(data)
     else:
         raise ValueError(f"Unknown content type: {content_type}")

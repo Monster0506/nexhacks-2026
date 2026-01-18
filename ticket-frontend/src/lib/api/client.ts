@@ -9,7 +9,7 @@ export interface BackendTicket {
   id: string;
   created_at: string;
   updated_at: string;
-  source: 'EMAIL' | 'DISCORD' | 'GITHUB' | 'FORM' | 'WEBHOOK';
+  source: 'EMAIL' | 'DISCORD' | 'GITHUB' | 'FORM' | 'WEBHOOK' | 'SMS';
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   category: 'BILLING' | 'TECHNICAL_SUPPORT' | 'FEATURE_REQUEST' | 'BUG_REPORT' | 'ADMIN' | 'OTHER' | null;
   status: 'INBOX' | 'TRIAGE_PENDING' | 'ASSIGNED' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
@@ -321,7 +321,7 @@ export async function getAgentStats(agentId: string): Promise<{
 }
 
 export async function createTicket(ticketData: {
-  source: 'EMAIL' | 'DISCORD' | 'GITHUB' | 'FORM' | 'WEBHOOK';
+  source: 'EMAIL' | 'DISCORD' | 'GITHUB' | 'FORM' | 'WEBHOOK' | 'SMS';
   content_type: string;
   payload: Record<string, any>;
   metadata?: Record<string, any>;
