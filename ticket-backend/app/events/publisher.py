@@ -159,7 +159,10 @@ class EventPublisher:
         }
         try:
             async with httpx.AsyncClient() as client:
+                print(f"Triggering coding agent webhook: {payload}")
+                print(f"Coding agent webhook URL: {webhook_url}")
                 response = await client.post(webhook_url, json=payload, timeout=10.0)
+                print(f"Coding agent webhook response: {response}")
                 response.raise_for_status()
         except Exception as e:
             # Log error but don't fail the ticket creation
