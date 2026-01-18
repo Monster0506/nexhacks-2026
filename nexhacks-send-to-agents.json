@@ -1,0 +1,620 @@
+{
+  "name": "nexhacks-send-to-agents",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cc2d8135-e6a3-44a5-ab76-238939894ce3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1088,
+        -160
+      ],
+      "id": "58c4556e-5a25-48cc-bc8d-bb2891cdf99f",
+      "name": "Webhook",
+      "webhookId": "cc2d8135-e6a3-44a5-ab76-238939894ce3"
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-3-pro-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        928,
+        176
+      ],
+      "id": "c481f4f5-df79-4e33-9418-084099cfa7ad",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "li0htbO3avLpjlY2",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "nexhacks2026",
+          "mode": "list",
+          "cachedResultName": "nexhacks2026",
+          "cachedResultUrl": "https://github.com/nexhacks2026"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "geese",
+          "mode": "list",
+          "cachedResultName": "geese",
+          "cachedResultUrl": "https://github.com/nexhacks2026/geese"
+        },
+        "filePath": "={{ $json.path }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -112,
+        -288
+      ],
+      "id": "3f799561-6757-42cb-89b1-57416ea079e2",
+      "name": "Get a file",
+      "webhookId": "837ee8be-6e78-4921-a122-20dad0167493",
+      "credentials": {
+        "githubApi": {
+          "id": "WAJTzIGO9Yq4p2FC",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        -64
+      ],
+      "id": "20586800-d27c-4d71-ae85-82c7f0852a69",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -288
+      ],
+      "id": "f7ce039a-72f0-4107-9f93-2614e51569a2",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let base64string = $json.content;\nlet bufferObj = Buffer.from(base64string, \"base64\");\nlet decodedString = bufferObj.toString(\"utf8\");\n\nreturn {\n  data: {\n    name: $json.name,\n    path: $json.path,\n    html_url: $json.html_url,\n    sha: $json.sha,\n  },\n  \"decoded\": decodedString \n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -240
+      ],
+      "id": "b806c8d8-6e27-4836-ab50-f04b91e229a8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI agent that modifies code in GitHub repositories. You have access to the complete repository file structure with all file contents, and tools for editing files via GitHub.\nYour Task\nWhen given a code change request:\n\nDetermine which files to modify - Based on the change request, repository structure, and file contents, identify all files that need updates:\n\nDo not overwrite the files, simply add onto or remove data as necessary. But do not override the file. And only work with files that currently exist. Do not try to make new files. Only use files that are available.\n\nFiles directly implementing the feature\nRelated configuration files\nFiles that import/depend on your changes\nConsider: routes, controllers, models, middleware, config files, tests\n\n\nMake the changes - For each file:\n\nFollow existing code style and patterns\nMaintain backward compatibility\nAdd appropriate error handling\nInclude clear comments\nUse the GitHub file editing tool to apply changes\nWhen all changes have been made to this branch, call the Pull Request HTTP tool. ONLY CALL THIS PULL REQUEST tool when you know for sure you have no more code to modify.\n\nFOR PULL REQUEST NAME, please name it the TOKEN ID only!!\n\nhere is the token id: {{ $('Aggregate1').item.json.data[1].body.ticket_id }}\n\nSummary - Briefly explain what you changed and why\n\nKey Principles\n\nFollow existing patterns - Match the code style, naming conventions, and architecture already in the repo\nBe thorough - Don't miss related files (if you add a function, update files that should use it)\nSecurity first - Never introduce vulnerabilities\nThink holistically - Consider how files interact with each other\n\nHere is the following data you have to work with:\n\nSubject: {{ $('Aggregate1').item.json.data[1].body.content.subject }}\nBody: {{ $('Aggregate1').item.json.data[1].body.content.body }}\n\nFile details:\n{{ JSON.stringify($('Aggregate1').item.json.data) }}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        928,
+        -32
+      ],
+      "id": "aefc5856-a92e-40c4-bcb1-74af6ea9dcaa",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "nexhacks2026",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "geese",
+          "mode": "name"
+        },
+        "filePath": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('File_Path', ``, 'string') }}",
+        "binaryData": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Binary_File', ``, 'boolean') }}",
+        "fileContent": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('File_Content', ``, 'string') }}",
+        "commitMessage": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Commit_Message', ``, 'string') }}",
+        "additionalParameters": {
+          "branch": {
+            "branch": "={{ String($('Aggregate2').item.json.data[1].randomIndex) }}"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.githubTool",
+      "typeVersion": 1.1,
+      "position": [
+        1056,
+        192
+      ],
+      "id": "ee1f595f-de4e-4261-b2c9-8052d0a40019",
+      "name": "Edit a file in GitHub",
+      "webhookId": "63adc08c-ff9c-4c17-8a24-f292236e7287",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "gR7o7x6A83xVFZ6J",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/nexhacks2026/geese/git/refs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"ref\": \"refs/heads/{{ $json.data[1].randomIndex }}\",\n  \"sha\": \"{{ $json.data[0].object.sha }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        640,
+        96
+      ],
+      "id": "21733425-5db2-4139-95b0-7a8850dd7fae",
+      "name": "Make a Branch",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "gR7o7x6A83xVFZ6J",
+          "name": "GitHub account"
+        },
+        "githubApi": {
+          "id": "WAJTzIGO9Yq4p2FC",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/nexhacks2026/geese/git/ref/heads/main",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        32,
+        48
+      ],
+      "id": "0ed880cf-9f7a-465e-bfaa-553da84ffae6",
+      "name": "Find most recent request",
+      "credentials": {
+        "githubApi": {
+          "id": "WAJTzIGO9Yq4p2FC",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const randomIndex = Math.round(Math.random() * 1000000);\n\nreturn { json: { randomIndex } };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        208
+      ],
+      "id": "03c92858-d1a0-4592-a2e0-4320c40778eb",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        272,
+        112
+      ],
+      "id": "247f063f-f3a6-4c26-add0-e110afd0e4af",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        448,
+        96
+      ],
+      "id": "4a99b0c1-69d1-4d96-91ea-3d2810ec6cf2",
+      "name": "Aggregate2"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "value": "nexhacks2026",
+          "mode": "list",
+          "cachedResultName": "nexhacks2026",
+          "cachedResultUrl": "https://github.com/nexhacks2026"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "geese",
+          "mode": "list",
+          "cachedResultName": "geese",
+          "cachedResultUrl": "https://github.com/nexhacks2026/geese"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -880,
+        -336
+      ],
+      "id": "f78cb4d4-8ee9-404d-bccb-490fff82dad1",
+      "name": "List Repo Files",
+      "webhookId": "31848bde-ac3e-4344-8508-f69f6518ded4",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "gR7o7x6A83xVFZ6J",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2f6fed6f-7dca-4b0a-83e3-267ee779c027",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "7b948006-c249-4cf1-a08b-489f1dbbcece",
+              "name": "path",
+              "value": "={{ $json.path }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -560,
+        -400
+      ],
+      "id": "6cb08708-9780-4bf0-9e55-199e5fdab0f0",
+      "name": "Decrease Repo File Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -272,
+        -416
+      ],
+      "id": "734301fc-ab5a-4dde-be8e-2c4e2ff01d79",
+      "name": "Pull in all repo file data and decode it"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -688,
+        -64
+      ],
+      "id": "44f31453-39ed-4a22-9239-0d395922fe94",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Make an HTTP request to make a pull request for the new changes that were created after editing a file.",
+        "method": "POST",
+        "url": "=https://api.github.com/repos/nexhacks2026/geese/pulls",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "body",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            },
+            {
+              "name": "head",
+              "value": "={{ String($('Aggregate2').item.json.data[1].randomIndex) }}"
+            },
+            {
+              "name": "base",
+              "value": "main"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        1152,
+        176
+      ],
+      "id": "8c2213db-cc2c-482a-9902-84df7047b1f9",
+      "name": "PR HTTP Request",
+      "credentials": {
+        "githubApi": {
+          "id": "WAJTzIGO9Yq4p2FC",
+          "name": "GitHub account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "List Repo Files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Find most recent request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Pull in all repo file data and decode it",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit a file in GitHub": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make a Branch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find most recent request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate2": {
+      "main": [
+        [
+          {
+            "node": "Make a Branch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Repo Files": {
+      "main": [
+        [
+          {
+            "node": "Decrease Repo File Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decrease Repo File Fields": {
+      "main": [
+        [
+          {
+            "node": "Pull in all repo file data and decode it",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull in all repo file data and decode it": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PR HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "fdeb053d-3d61-4367-92be-59ac3febae0e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "14de6ac49c93d3031942c5b3c98f9ea2b0f04b1959d9689ed31784f1b4198b24"
+  },
+  "id": "0fMAOHgzwdECl0Std99XG",
+  "tags": []
+}

@@ -26,7 +26,7 @@
       "typeVersion": 2,
       "position": [
         224,
-        0
+        -16
       ],
       "id": "9ebc4388-f08b-44ae-8f67-4e0ba84c2c4f",
       "name": "Get many messages",
@@ -47,8 +47,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        0,
-        0
+        -208,
+        -64
       ],
       "id": "ef0b97b9-236b-4a39-8532-92ce9155ead7",
       "name": "Webhook",
@@ -102,8 +102,10 @@
         },
         "repository": {
           "__rl": true,
-          "value": "nexhacks-2026",
-          "mode": "list"
+          "value": "geese",
+          "mode": "list",
+          "cachedResultName": "geese",
+          "cachedResultUrl": "https://github.com/nexhacks2026/geese"
         },
         "events": [
           "issues"
@@ -154,10 +156,10 @@
         },
         "repository": {
           "__rl": true,
-          "value": "nexhacks-2026",
+          "value": "geese",
           "mode": "list",
-          "cachedResultName": "nexhacks-2026",
-          "cachedResultUrl": "https://github.com/nexhacks2026/nexhacks-2026"
+          "cachedResultName": "geese",
+          "cachedResultUrl": "https://github.com/nexhacks2026/geese"
         },
         "issueNumber": "={{ $json.body.issue.number }}",
         "body": "Received from the n8n agent. Your task is being created..."
@@ -191,10 +193,10 @@
         },
         "repository": {
           "__rl": true,
-          "value": "nexhacks-2026",
+          "value": "geese",
           "mode": "list",
-          "cachedResultName": "nexhacks-2026",
-          "cachedResultUrl": "https://github.com/nexhacks2026/nexhacks-2026"
+          "cachedResultName": "geese",
+          "cachedResultUrl": "https://github.com/nexhacks2026/geese"
         },
         "issueNumber": "={{ $json.payload.id }}",
         "body": "Task created!"
@@ -250,7 +252,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const text = ($input.first().json.payload.subject + \" \" + $input.first().json.payload.body).toLowerCase();\n\nconst existingTags = $input.first().json.metadata.tags || [];\n// Merge + dedupe\nconst tags = [...new Set([...existingTags])];\n\n// ---- Helper ----\nconst add = (tag) => { if (!tags.includes(tag)) tags.push(tag); };\n\nif (text.match(/```|`[^`]+`/)) add(\"contains-code\");\n\n// Stack traces & errors\nif (text.match(/exception|stack trace|traceback|segmentation fault|core dumped/))\n  add(\"stack-trace\");\n\n// Common error language\nif (text.match(/\\berror\\b|\\bfail(ed|ure)?\\b|\\bcrash(ed)?\\b|\\bpanic\\b/))\n  add(\"error\");\n\n// Programming languages\nif (text.match(/\\b(js|javascript|node|node\\.js)\\b/)) add(\"lang-javascript\");\nif (text.match(/\\b(python|py|pip|venv)\\b/)){ \n  add(\"lang-python\");\n  add(\"coding\")\n}\nif (text.match(/\\b(java|jvm|spring)\\b/)){ \n  add(\"lang-java\");\n  add(\"coding\")\n}\nif (text.match(/\\b(c\\+\\+|cpp|c#|\\.net)\\b/)){ \n  add(\"lang-c-family\");\n  add(\"coding\")\n}\nif (text.match(/\\b(golang)\\b/)){ \n  add(\"lang-go\");\n  add(\"coding\")\n}\nif (text.match(/\\b(rust|cargo)\\b/)){ \n  add(\"lang-rust\");\n  add(\"coding\")\n}\n\n// Dev tooling\nif (text.match(/\\b(git|github|gitlab|commit|pr|pull request|merge)\\b/))\n  add(\"tool-git\");\n\nif (text.match(/\\b(docker|container|kubernetes|k8s)\\b/))\n  add(\"tool-containers\");\n\nif (text.match(/\\b(ci|cd|pipeline|github actions|jenkins)\\b/))\n  add(\"tool-ci\");\n\n// APIs & infra\nif (text.match(/\\b(api|endpoint|rest|graphql|webhook)\\b/))\n  add(\"api-related\");\n\nif (text.match(/\\b(server|backend|frontend|database|db|sql|postgres|mysql|redis)\\b/))\n  add(\"infra\");\n\n// ================================\n// 🧍 USER-INTENT TAGS (VISIBLE)\n// ================================\n\n// Core intent\nif (text.match(/\\b(bug|issue|broken|doesn'?t work)\\b/))\n  add(\"bug\");\n\nif (text.match(/\\b(feature|request|enhancement|would be nice|add support)\\b/))\n  add(\"feature-request\");\n\nif (text.match(/\\b(how do i|how to|help|question)\\b/))\n  add(\"question\");\n\nif (text.match(/\\b(docs|documentation|readme|guide)\\b/))\n  add(\"docs\");\n\n// Urgency & severity\nif (text.match(/\\b(urgent|asap|immediately|right now)\\b/))\n  add(\"priority-high\");\n\nif (text.match(/\\b(blocked|blocking|cannot proceed|stuck)\\b/))\n  add(\"blocked\");\n\nif (text.match(/\\b(down|outage|incident|production)\\b/))\n  add(\"incident\");\n\n// Existing tags (fallback to empty array)\n\n\nreturn [{\n  json: {\n    ...$input.first().json,\n    metadata: {\n      ...$input.first().json.metadata,\n      tags: tags\n    }\n  }\n}];"
+        "jsCode": "const text = ($input.first().json.payload.subject + \" \" + $input.first().json.payload.body).toLowerCase();\n\nconst existingTags = $input.first().json.metadata.tags || [];\n// Merge + dedupe\nconst tags = [...new Set([...existingTags])];\n\n// ---- Helper ----\nconst add = (tag) => { if (!tags.includes(tag)) tags.push(tag); };\n\nif (text.match(/```|`[^`]+`/)) add(\"contains-code\");\n\n// Stack traces & errors\nif (text.match(/exception|stack trace|traceback|segmentation fault|core dumped/))\n  add(\"stack-trace\");\n\n// Common error language\nif (text.match(/\\berror\\b|\\bfail(ed|ure)?\\b|\\bcrash(ed)?\\b|\\bpanic\\b/))\n  add(\"error\");\n\n// Programming languages\nif (text.match(/\\b(js|javascript|node|node\\.js)\\b/)) add(\"lang-javascript\");\nif (text.match(/\\b(python|py|pip|venv)\\b/)){ \n  add(\"lang-python\");\n  add(\"coding\")\n}\nif (text.match(/\\b(java|jvm|spring)\\b/)){ \n  add(\"lang-java\");\n  add(\"coding\")\n}\nif (text.match(/\\b(c\\+\\+|cpp|c#|\\.net)\\b/)){ \n  add(\"lang-c-family\");\n  add(\"coding\")\n}\nif (text.match(/\\b(golang)\\b/)){ \n  add(\"lang-go\");\n  add(\"coding\")\n}\nif (text.match(/\\b(rust|cargo)\\b/)){ \n  add(\"lang-rust\");\n  add(\"coding\")\n}\nif (text.match(/\\b(html|css|js)\\b/)){ \n  add(\"lang-web\");\n  add(\"coding\")\n}\n\n// Dev tooling\nif (text.match(/\\b(git|github|gitlab|commit|pr|pull request|merge)\\b/))\n  add(\"tool-git\");\n\nif (text.match(/\\b(docker|container|kubernetes|k8s)\\b/))\n  add(\"tool-containers\");\n\nif (text.match(/\\b(ci|cd|pipeline|github actions|jenkins)\\b/))\n  add(\"tool-ci\");\n\n// APIs & infra\nif (text.match(/\\b(api|endpoint|rest|graphql|webhook)\\b/))\n  add(\"api-related\");\n\nif (text.match(/\\b(server|backend|frontend|database|db|sql|postgres|mysql|redis)\\b/))\n  add(\"infra\");\n\n// ================================\n// 🧍 USER-INTENT TAGS (VISIBLE)\n// ================================\n\n// Core intent\nif (text.match(/\\b(bug|issue|broken|doesn'?t work)\\b/))\n  add(\"bug\");\n\nif (text.match(/\\b(feature|request|enhancement|would be nice|add support)\\b/))\n  add(\"feature-request\");\n\nif (text.match(/\\b(how do i|how to|help|question)\\b/))\n  add(\"question\");\n\nif (text.match(/\\b(docs|documentation|readme|guide)\\b/))\n  add(\"docs\");\n\n// Urgency & severity\nif (text.match(/\\b(urgent|asap|immediately|right now)\\b/))\n  add(\"priority-high\");\n\nif (text.match(/\\b(blocked|blocking|cannot proceed|stuck)\\b/))\n  add(\"blocked\");\n\nif (text.match(/\\b(down|outage|incident|production)\\b/))\n  add(\"incident\");\n\n// Existing tags (fallback to empty array)\n\n\nreturn [{\n  json: {\n    ...$input.first().json,\n    metadata: {\n      ...$input.first().json.metadata,\n      tags: tags\n    }\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -277,8 +279,8 @@
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1.3,
       "position": [
-        144,
-        816
+        48,
+        784
       ],
       "id": "27439292-95b7-48e1-81e6-e70b485466c7",
       "name": "Gmail Trigger",
@@ -292,14 +294,14 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "={\n  \"source\": \"EMAIL\",\n  \"content_type\": \"email\",\n  \"payload\": {\n    \"id\": \"{{ $json.id }}\",\n    \"issue_url\": \"null\",\n    \"repo_url\": \"null\",\n    \"user\": \"null\",\n    \"subject\": \"{{ $json.Subject }}\",\n    \"body\": \"{{ $json.snippet }}\",\n    \"timestamp\": {{ $now }},\n  },\n  \"metadata\": {\n    \"priority\": \"MEDIUM\",\n    \"tags\": [\"email\"]\n  }\n}\n ",
+        "jsonOutput": "={\n  \"source\": \"EMAIL\",\n  \"content_type\": \"email\",\n  \"payload\": {\n    \"id\": \"{{ $json.id }}\",\n    \"issue_url\": \"null\",\n    \"repo_url\": \"null\",\n    \"user\": \"{{ $json.From }}\",\n    \"subject\": \"{{ $json.Subject }}\",\n    \"body\": \"{{ $json.snippet }}\",\n    \"timestamp\": {{ $now }},\n  },\n  \"metadata\": {\n    \"priority\": \"MEDIUM\",\n    \"tags\": [\"email\"]\n  }\n}\n ",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        352,
-        752
+        592,
+        720
       ],
       "id": "cdea1be0-718c-42fb-a14a-fc480abe538c",
       "name": "Edit Fields"
@@ -316,8 +318,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        352,
-        912
+        592,
+        880
       ],
       "id": "12d10fcd-b8b7-4642-a88b-6b4f1db3b788",
       "name": "Reply to a message",
@@ -374,6 +376,72 @@
       ],
       "id": "f03fa9e1-0cf1-49e3-89f8-b3876e0402a0",
       "name": "If Opened Task"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b63f1f37-0e3b-475c-99ff-38b08bf16ba8",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "nexhacks2026@gmail.com",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        256,
+        784
+      ],
+      "id": "a91675b1-9b29-4bda-9645-444bd60980d4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b63f1f37-0e3b-475c-99ff-38b08bf16ba8",
+              "leftValue": "={{ $json.body.username }}",
+              "rightValue": "nexHacks",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        -80
+      ],
+      "id": "f97df8f6-8453-42b4-906e-10b9f0e72865",
+      "name": "If1"
     }
   ],
   "pinData": {},
@@ -382,7 +450,7 @@
       "main": [
         [
           {
-            "node": "Get many messages",
+            "node": "If1",
             "type": "main",
             "index": 0
           }
@@ -457,12 +525,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Reply to a message",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -518,6 +581,35 @@
         ],
         []
       ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -525,10 +617,9 @@
     "executionOrder": "v1",
     "availableInMCP": false,
     "timeSavedMode": "fixed",
-    "callerPolicy": "workflowsFromSameOwner",
-    "executionTimeout": -1
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "9463ece0-817b-4e0e-b67f-bac9c651548a",
+  "versionId": "1ed8b85f-42f1-425f-8159-bfde86d568ac",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "14de6ac49c93d3031942c5b3c98f9ea2b0f04b1959d9689ed31784f1b4198b24"
