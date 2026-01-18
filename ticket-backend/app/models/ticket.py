@@ -61,7 +61,23 @@ class Ticket(BaseTicket):
         self._ai_reasoning = ai_reasoning or {}
         self._resolution_action = resolution_action
         self._suggested_assignee = suggested_assignee
-        self._title = title if title else description
+        # Set title intelligently: prefer explicit title, then description, then extract from content
+        if title:
+            self._title = title
+        elif description:
+            self._title = description
+        else:
+            # Try to extract title from content
+            content_dict = content.to_dict()
+            if "subject" in content_dict:
+                self._title = content_dict["subject"]
+            elif "issue_title" in content_dict:
+                self._title = content_dict["issue_title"]
+            elif "message_text" in content_dict:
+                # Truncate long messages for title
+                self._title = content_dict["message_text"][:100]
+            else:
+                self._title = None
         self._description = description
 
     @classmethod
@@ -144,7 +160,7 @@ class Ticket(BaseTicket):
     @property
     def title(self) -> str:
         """Get ticket title, falling back to content-based title if not set."""
-        if self._title is not None:
+        if self._title:
             return self._title
         # Fallback to extracting from content
         content_dict = self._content.to_dict()
@@ -153,7 +169,9 @@ class Ticket(BaseTicket):
         elif "issue_title" in content_dict:
             return content_dict["issue_title"]
         elif "message_text" in content_dict:
-            return content_dict["message_text"][:100]
+            # Truncate long messages for title
+            msg = content_dict["message_text"]
+            return msg[:100] + ("..." if len(msg) > 100 else "")
         return "Untitled Ticket"
 
     @property
