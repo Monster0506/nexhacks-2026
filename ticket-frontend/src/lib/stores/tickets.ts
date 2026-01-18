@@ -29,6 +29,9 @@ export interface AIReasoning {
   summary: string
   confidence: number
   steps: ReasoningStep[]
+  autoResolved?: boolean
+  autoResponse?: string
+  sourceDocs?: string[]
 }
 
 // Backend status types matching the backend enums
@@ -228,6 +231,9 @@ function transformBackendTicket(backendTicket: BackendTicket): Ticket {
     summary: backendTicket.ai_reasoning?.summary || (backendTicket.ai_reasoning?.reasoning as string) || `Ticket from ${backendTicket.source}`,
     confidence: backendTicket.ai_reasoning?.confidence || 0.5,
     steps: [],
+    autoResolved: backendTicket.ai_reasoning?.auto_resolved || false,
+    autoResponse: backendTicket.ai_reasoning?.auto_response || undefined,
+    sourceDocs: backendTicket.ai_reasoning?.source_docs || [],
   }
 
   // Add reasoning steps if available

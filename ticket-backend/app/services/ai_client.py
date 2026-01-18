@@ -48,13 +48,14 @@ class AIClient:
             self.logger.error(f"Failed to call AI code analysis: {e}")
             return None
 
-    async def analyze_support(self, ticket: Ticket, context: dict) -> Optional[dict]:
+    async def analyze_support(self, ticket: Ticket) -> Optional[dict]:
         """
-        Call AI backend for support analysis.
+        Call AI backend for support analysis using documentation.
         """
         url = f"{self.base_url}/analyze/support"
         try:
-            payload = {"ticket": ticket.to_dict(), "context": context}
+            # Send ticket data with empty context - ai-backend uses its own docs
+            payload = {"ticket": ticket.to_dict(), "context": {}}
             async with httpx.AsyncClient() as client:
                 response = await client.post(url, json=payload, timeout=30.0)
                 response.raise_for_status()

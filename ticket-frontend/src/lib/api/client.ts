@@ -33,6 +33,9 @@ export interface BackendTicket {
     confidence?: number;
     category?: string;
     priority?: string;
+    auto_resolved?: boolean;
+    auto_response?: string;
+    source_docs?: string[];
     [key: string]: unknown;
   };
   resolution_action: string;
@@ -328,7 +331,7 @@ export async function createTicket(ticketData: {
   estimated_time_to_triage: string;
   created_at: string;
 }> {
-  
+
   const response = await fetch(`${API_BASE_URL}/api/tickets/ingest`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

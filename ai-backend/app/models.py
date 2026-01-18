@@ -32,6 +32,8 @@ class TriageResult(BaseModel):
     suggested_assignee: Optional[str] = None  # ID of the suggested agent
     tags: List[str] = []
     estimated_resolution_time_hours: Optional[int] = None
+    can_auto_resolve: bool = False  # AI thinks this can be resolved via docs
+    auto_resolve_reasoning: Optional[str] = None  # Why it can be auto-resolved
 
 
 # --- Code Analysis Models ---
@@ -78,3 +80,5 @@ class SupportAnalysisResult(BaseModel):
     self_service: Optional[dict] = None
     confidence: float
     reasoning: str
+    response_text: Optional[str] = None  # Actual response to send to user
+    source_docs: List[str] = []  # Filenames of docs used for the response

@@ -68,7 +68,14 @@
         </svg>
       </div>
       <div class="text-left">
-        <span class="text-sm font-medium text-foreground block">AI Reasoning</span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium text-foreground block">AI Reasoning</span>
+          {#if reasoning.autoResolved}
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-400 font-semibold uppercase tracking-wide">
+              Auto-Resolved
+            </span>
+          {/if}
+        </div>
         <span class="text-xs text-muted-foreground">{reasoning.summary}</span>
       </div>
     </div>
@@ -97,6 +104,33 @@
   
   {#if isExpanded}
     <div class="p-4 space-y-3 bg-card" transition:slide={{ duration: 200 }}>
+      
+      <!-- Auto-Resolved Response Section -->
+      {#if reasoning.autoResolved && reasoning.autoResponse}
+        <div class="rounded-lg border border-green-500/30 bg-green-500/5 p-4 mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-xs font-semibold text-green-400 uppercase tracking-wide">AI Response</span>
+          </div>
+          <p class="text-sm text-foreground leading-relaxed">{reasoning.autoResponse}</p>
+          
+          {#if reasoning.sourceDocs && reasoning.sourceDocs.length > 0}
+            <div class="mt-3 pt-3 border-t border-green-500/20">
+              <span class="text-[10px] text-muted-foreground uppercase tracking-wide">Source Docs:</span>
+              <div class="flex flex-wrap gap-1 mt-1">
+                {#each reasoning.sourceDocs as doc}
+                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                    {doc}
+                  </span>
+                {/each}
+              </div>
+            </div>
+          {/if}
+        </div>
+      {/if}
+      
       {#each reasoning.steps as step, index}
         {#if index < visibleSteps}
           <div 
@@ -133,3 +167,4 @@
     </div>
   {/if}
 </div>
+
