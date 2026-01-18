@@ -223,7 +223,8 @@ export async function assignTicket(
 export async function releaseTicket(
   ticketId: string,
   agentId: string,
-  reason?: string
+  reason?: string,
+  retriage?: boolean
 ): Promise<DistributionResponse> {
   const response = await fetch(`${API_BASE_URL}/api/distribution/release`, {
     method: 'POST',
@@ -232,6 +233,7 @@ export async function releaseTicket(
       ticket_id: ticketId,
       agent_id: agentId,
       reason,
+      retriage: retriage || false,
     }),
   });
 

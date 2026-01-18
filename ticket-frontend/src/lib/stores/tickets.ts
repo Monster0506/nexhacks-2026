@@ -425,9 +425,14 @@ export async function assignTicketToAgent(ticketId: string, agentId: string): Pr
   }
 }
 
-export async function releaseTicketFromAgent(ticketId: string, agentId: string): Promise<void> {
+export async function releaseTicketFromAgent(
+  ticketId: string,
+  agentId: string,
+  reason?: string,
+  retriage?: boolean
+): Promise<void> {
   try {
-    await releaseTicket(ticketId, agentId)
+    await releaseTicket(ticketId, agentId, reason, retriage)
 
     // Reload tickets to get the backend's status update
     await loadTickets()

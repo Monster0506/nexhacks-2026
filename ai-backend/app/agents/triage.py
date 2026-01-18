@@ -50,6 +50,13 @@ Assignee Selection:
 - Prefer agents with lower `current_load` if skills are a match.
 - If assigned to human or coding_agent, set can_auto_resolve to false.
 - Only leave suggested_assignee null if can_auto_resolve is true.
+- CRITICAL: Look for "Unassignment Note" sections in the Description field. These contain
+  feedback from admins about why a previous assignment failed. Use this information to:
+  1. Understand why the previous assignee couldn't handle the ticket
+  2. Select a DIFFERENT agent with better matching skills
+  3. Never assign to the same person mentioned in "Previously assigned to"
+  4. Learn from the reason provided to make a better choice this time
+
 
 Output schema:
 {
@@ -89,6 +96,7 @@ Ticket Source: {ticket.source}
 Content: {ticket.content.subject} / {ticket.content.body}
 Title: {ticket.content.issue_title}
 Message: {ticket.content.message_text}
+Description: {ticket.description if hasattr(ticket, 'description') else 'N/A'}
 
 Available Agents:
 {agents_context}
