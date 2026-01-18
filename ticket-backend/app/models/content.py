@@ -262,6 +262,10 @@ class GitHubContent(TicketContent):
     def issue_body(self) -> str:
         return self._issue_body
 
+    @property
+    def url(self) -> Optional[str]:
+        return self._url
+
     def extract_body(self) -> str:
         return self._issue_body
 
@@ -342,6 +346,18 @@ class FormContent(TicketContent):
     @property
     def submission_time(self) -> datetime:
         return self._submission_time
+
+    @property
+    def form_id(self) -> Optional[str]:
+        return self._form_id
+
+    @property
+    def submitter_email(self) -> Optional[str]:
+        return self._submitter_email
+
+    @property
+    def submitter_name(self) -> Optional[str]:
+        return self._submitter_name
 
     def extract_body(self) -> str:
         # Try to find a 'message' or 'body' field, otherwise return all fields
