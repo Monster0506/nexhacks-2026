@@ -358,9 +358,7 @@ async def ingest_ticket(
     # Don't publish triage_pending since we're keeping it in inbox
     # background_tasks.add_task(event_publisher.publish_ticket_triage_pending, ticket)
 
-    if any(tag in ["coding"] for tag in tags):
-        print("Coding Tag detected, calling the coding agent")
-        background_tasks.add_task(event_publisher.publish_coding_agent_trigger, ticket)
+    # Coding agent trigger is now handled by QueueManager when AI assigns to coding-agent
 
     return IngestResponse(
         ticket_id=ticket.id,
