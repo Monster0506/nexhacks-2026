@@ -169,24 +169,57 @@ class QueueManager:
         for tag in ai_tags:
             ticket.add_tag(tag)
 
-        # Determine queue move based on confidence
+        # Determine queue move based on confidence and auto-resolve capability
         conf = result.get("confidence", 0)
+        can_auto_resolve = result.get("can_auto_resolve", False)
 
-        # >= 0.8: High confidence -> Auto-assign (move to ASSIGNMENT)
+        # Check for auto-resolution first (high confidence + docs can answer)
+        if conf >= 0.8 and can_auto_resolve:
+            try:
+                import asyncio
+                from app.services.ai_client import ai_client
+
+                async def auto_resolve_task():
+                    print(f"[AUTO-RESOLVE] Attempting auto-resolution for ticket {ticket.id}")
+                    support_result = await ai_client.analyze_support(ticket)
+                    
+                    if support_result and support_result.get("confidence", 0) >= 0.7:
+                        # Auto-resolve the ticket
+                        response_text = support_result.get("response_text", "")
+                        source_docs = support_result.get("source_docs", [])
+                        
+                        ticket.add_ai_response(response_text, source_docs)
+                        ticket.update_status(TicketStatus.RESOLVED)
+                        
+                        self.move_ticket(
+                            ticket.id,
+                            QueueType.INBOX,
+                            QueueType.RESOLUTION,
+                            ticket,
+                            reason=f"AI Auto-Resolved from docs: {', '.join(source_docs) if source_docs else 'unknown'}",
+                        )
+                        print(f"[AUTO-RESOLVE] Ticket {ticket.id} auto-resolved using: {source_docs}")
+                    else:
+                        # Fallback to human assignment
+                        print(f"[AUTO-RESOLVE] Support agent confidence too low, falling back to assignment")
+                        self._assign_to_human(ticket, result, conf)
+
+                # Get or create event loop to run background task
+                try:
+                    loop = asyncio.get_running_loop()
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+
+                loop.create_task(auto_resolve_task())
+            except Exception as e:
+                print(f"[AUTO-RESOLVE] Failed: {e}, falling back to assignment")
+                self._assign_to_human(ticket, result, conf)
+            return
+
+        # Standard flow: >= 0.8 confidence -> Auto-assign
         if conf >= 0.8:
-            # Actually assign the ticket if AI suggested an assignee
-            if suggested_assignee:
-                ticket.assign(suggested_assignee)
-            else:
-                # No assignee suggestion, just update status
-                ticket.update_status(TicketStatus.ASSIGNED)
-            self.move_ticket(
-                ticket.id,
-                QueueType.INBOX,
-                QueueType.ASSIGNMENT,
-                ticket,
-                reason=f"AI Auto-Triage (Confidence: {conf})",
-            )
+            self._assign_to_human(ticket, result, conf)
         else:
             # < 0.8: Low confidence -> Manual Triage (move to TRIAGE)
             self.move_ticket(
@@ -196,6 +229,24 @@ class QueueManager:
                 ticket,
                 reason=f"AI Triage Needed (Confidence: {conf})",
             )
+
+    def _assign_to_human(self, ticket: Ticket, result: dict, conf: float) -> None:
+        """Helper to assign ticket to a human agent."""
+        from app.models import TicketStatus
+
+        suggested_assignee = result.get("suggested_assignee")
+        if suggested_assignee:
+            ticket.assign(suggested_assignee)
+        else:
+            ticket.update_status(TicketStatus.ASSIGNED)
+        
+        self.move_ticket(
+            ticket.id,
+            QueueType.INBOX,
+            QueueType.ASSIGNMENT,
+            ticket,
+            reason=f"AI Auto-Triage (Confidence: {conf})",
+        )
 
     def dequeue(self, queue: QueueType, priority_based: bool = True) -> Optional[str]:
         """

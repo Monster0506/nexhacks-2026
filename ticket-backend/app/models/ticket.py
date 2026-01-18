@@ -284,6 +284,13 @@ class Ticket(BaseTicket):
             self._tags.remove(tag)
             self._touch()
 
+    def add_ai_response(self, response: str, source_docs: list[str] = None) -> None:
+        """Store AI-generated response for auto-resolved tickets."""
+        self._ai_reasoning["auto_response"] = response
+        self._ai_reasoning["auto_resolved"] = True
+        self._ai_reasoning["source_docs"] = source_docs or []
+        self._touch()
+
     def validate(self) -> bool:
         """Validate the ticket data."""
         if not self._id:

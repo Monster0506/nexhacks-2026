@@ -1,6 +1,7 @@
 from app.agents.base import BaseAgent
 from app.models import SupportAnalysisRequest, SupportAnalysisResult
 from app.config import Config
+from app.services.doc_loader import doc_loader
 
 import logging
 
@@ -13,49 +14,55 @@ class SupportAgent(BaseAgent):
 
     async def analyze(self, request: SupportAnalysisRequest) -> SupportAnalysisResult:
         logger.info(
-            f"Analyzing support request for ticket: {request.ticket.ticket_id if hasattr(request.ticket, 'ticket_id') else 'new'}"
+            f"Analyzing support request for ticket: {request.ticket.id if hasattr(request.ticket, 'id') else 'new'}"
         )
         ticket = request.ticket
-        context = request.context
 
-        faq_list_str = ""
-        if context and context.faqs:
-            for faq in context.faqs:
-                faq_list_str += f"- ID: {faq.id}\n  Question: {faq.question}\n  Answer: {faq.answer}\n  Link: {faq.link}\n"
+        # Get documentation context and list of available docs
+        docs_context = doc_loader.get_docs_context()
+        available_docs = doc_loader.list_docs()
 
         system_prompt = """
-You are a support specialist. Match the ticket to FAQs or self-service actions.
+You are a support specialist. Your job is to resolve tickets using the provided documentation.
 
-Determine:
-1. Does this match an FAQ? If yes, which one?
-2. Is this a duplicate?
-3. Can the user self-service?
-4. If none, escalate.
+Analyze the ticket and determine if you can provide a helpful response based on the documentation.
+
+Rules:
+1. If the documentation contains relevant information, provide a clear, helpful response.
+2. Include the SPECIFIC document name(s) you used in `source_docs`.
+3. Set `resolution_action` based on outcome:
+   - "FAQ_LINK": Documentation directly answers the question
+   - "SELF_SERVICE_REDIRECT": User can resolve themselves with provided steps
+   - "ESCALATE": Documentation doesn't cover this, needs human help
+4. Write `response_text` as if you're replying directly to the user. Be friendly and helpful.
+5. Be honest about confidence. If docs are only partially relevant, lower confidence.
 
 Output schema (JSON):
 {
-  "resolution_action": "FAQ_LINK|DUPLICATE_CLOSE|SELF_SERVICE_REDIRECT|ESCALATE",
+  "resolution_action": "FAQ_LINK|SELF_SERVICE_REDIRECT|ESCALATE",
   "faq_match": {
-    "faq_id": "...",
-    "question": "...",
-    "link": "...",
-    "confidence": 0.0
+    "doc_name": "...",
+    "relevant_section": "..."
   },
   "self_service": {
     "action": "...",
     "steps": ["..."]
   },
   "confidence": 0.0,
-  "reasoning": "..."
+  "reasoning": "...",
+  "response_text": "Your friendly response to the user...",
+  "source_docs": ["doc_name1", "doc_name2"]
 }
 """
 
         user_content = f"""
-Ticket: {ticket.content.issue_title or ticket.content.subject}
-Body: {ticket.content.body or ticket.content.message_text}
+Ticket Subject: {ticket.content.subject or ticket.content.issue_title or 'No subject'}
+Ticket Body: {ticket.content.body or ticket.content.message_text or 'No body'}
 
-Available FAQs:
-{faq_list_str}
+Available Documentation Files: {', '.join(available_docs) if available_docs else 'None'}
+
+Reference Documentation:
+{docs_context}
 """
 
         result_json = await self._call_llm(
@@ -65,4 +72,5 @@ Available FAQs:
         return SupportAnalysisResult(**result_json)
 
 
+# Singleton instance
 support_agent = SupportAgent()
