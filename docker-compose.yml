@@ -52,9 +52,7 @@ services:
       - backend
     restart: unless-stopped
 
-  bot_webhook:
-    profiles:
-      - discord
+  bot_webhook:s
     build:
       context: ./discord_bot_js
       dockerfile: Dockerfile
