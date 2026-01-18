@@ -1,0 +1,425 @@
+{
+  "name": "misc_webhooks",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "5dae39f8-9304-4049-b65a-daa3c78da3c0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -784,
+        -128
+      ],
+      "id": "8f3c88f1-d9f4-4683-84d0-448e9d42a1f2",
+      "name": "Webhook",
+      "webhookId": "5dae39f8-9304-4049-b65a-daa3c78da3c0"
+    },
+    {
+      "parameters": {
+        "sendTo": "nexhacks2026@gmail.com",
+        "subject": "Ticket Resolved",
+        "message": "Your ticket has been resolved!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        -208
+      ],
+      "id": "1a89b548-1aa9-488c-8432-bf9a8b8186c0",
+      "name": "Send a message",
+      "webhookId": "74571516-d29d-4462-b253-9629761698e9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g4t1GudG7shruDPz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "nexhacks2026",
+          "mode": "list",
+          "cachedResultName": "nexhacks2026",
+          "cachedResultUrl": "https://github.com/nexhacks2026"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "geese",
+          "mode": "list",
+          "cachedResultName": "geese",
+          "cachedResultUrl": "https://github.com/nexhacks2026/geese"
+        },
+        "editFields": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        -80
+      ],
+      "id": "db49f768-2507-414c-802d-6099272feb7b",
+      "name": "Edit an issue",
+      "webhookId": "d9f5259a-c36a-44e6-a18e-21f78b21d1ba",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "gR7o7x6A83xVFZ6J",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1462147092691681383",
+          "mode": "list",
+          "cachedResultName": "BestTeam-NexHacks",
+          "cachedResultUrl": "https://discord.com/channels/1462147092691681383"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1462147280391110686",
+          "mode": "list",
+          "cachedResultName": "add-tasks",
+          "cachedResultUrl": "https://discord.com/channels/1462147092691681383/1462147280391110686"
+        },
+        "content": "={{ $('Basic LLM Chain').item.json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        320,
+        160
+      ],
+      "id": "8e4f15ba-c8b1-439d-81d1-5890f63b252b",
+      "name": "Send a message1",
+      "webhookId": "423babe1-fa79-42d2-89c5-aed7ccebf7f8",
+      "credentials": {
+        "discordBotApi": {
+          "id": "CNBBnTnChO9YXcN4",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "owner": {
+          "__rl": true,
+          "value": "nexhacks2026",
+          "mode": "list",
+          "cachedResultName": "nexhacks2026",
+          "cachedResultUrl": "https://github.com/nexhacks2026"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "geese",
+          "mode": "list",
+          "cachedResultName": "geese",
+          "cachedResultUrl": "https://github.com/nexhacks2026/geese"
+        },
+        "events": [
+          "pull_request"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        416
+      ],
+      "id": "647243b8-9643-45f5-8629-384eaaf96e59",
+      "name": "Github Trigger",
+      "webhookId": "6fc6a96d-c0a1-4b10-8064-6669c3ed615b",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "gR7o7x6A83xVFZ6J",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3e1020ab-7051-4516-b6ae-6eb04c09d795",
+              "leftValue": "={{ $json.body.pull_request.state }}",
+              "rightValue": "closed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        416
+      ],
+      "id": "8f64c15c-546f-4fa9-828a-49772e480924",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://narr0w.tech/api/tickets/{{ $('Github Trigger').item.json.body.pull_request.title }}/resolve",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"resolution_message\": \"Ticket {{ $json.body.pull_request.title }} resolved\",\n  \"resolution_action\": \"MANUAL\" \n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        80,
+        368
+      ],
+      "id": "1f2678e0-919a-4e29-bf05-88e985f6980d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a message to a user detailing how their ticket was resolved\n\n{{ JSON.stringify($json.body) }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -512,
+        -240
+      ],
+      "id": "55512ddd-b071-4074-8c80-d10590967539",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-3-flash-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        224
+      ],
+      "id": "37478358-0ecb-4b6d-bc62-4ea271b9fde0",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "KRZexxoapMGJ05xO",
+          "name": "OpenRouter account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook').item.json.body.source }}",
+                    "rightValue": "GMAIL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "8c6569cd-c5d7-4d47-9d88-2f0a86c9708d"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d4149f7c-543c-4209-8b39-4f70ad5f7deb",
+                    "leftValue": "={{ $('Webhook').item.json.body.source }}",
+                    "rightValue": "GITHUB",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9cb1f276-e631-4a65-a9d9-cbbe511515c0",
+                    "leftValue": "={{ $('Webhook').item.json.body.source }}",
+                    "rightValue": "DISCORD",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "400ab181-8bf8-46d2-a468-a49eefdc5ca7",
+      "name": "Switch"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Github Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit an issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "88bb8428-8d1c-4433-ad82-b37cc5008fdb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "14de6ac49c93d3031942c5b3c98f9ea2b0f04b1959d9689ed31784f1b4198b24"
+  },
+  "id": "2XQMbNWtQMwOTXfG5uZ_e",
+  "tags": []
+}
