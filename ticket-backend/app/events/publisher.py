@@ -87,6 +87,7 @@ class EventPublisher:
                 "assignee": assignee,
                 "previous_assignee": previous_assignee,
                 "queue": ticket.current_queue.value,
+                "description": ticket.description,
             },
             ticket=ticket,
             extra_channels=[f"agent.{assignee}"],
