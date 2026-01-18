@@ -38,6 +38,7 @@ class ReleaseRequest(BaseModel):
     ticket_id: str
     agent_id: str
     reason: Optional[str] = None
+    retriage: Optional[bool] = False  # If true, send back to INBOX for AI re-triage
 
 
 class TransferRequest(BaseModel):
@@ -258,7 +259,7 @@ async def release_ticket(
     request: ReleaseRequest,
     background_tasks: BackgroundTasks,
 ):
-    """Release a ticket back to the assignment queue."""
+    """Release a ticket back to the assignment queue or inbox for re-triage."""
     ticket = ticket_repository.get(request.ticket_id)
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
@@ -270,24 +271,36 @@ async def release_ticket(
         )
 
     old_queue = ticket.current_queue
+    old_assignee = ticket.assignee
 
     # Unassign (this will set status and queue appropriately)
     ticket.unassign()
+
+    # Determine target queue based on retriage flag
+    if request.retriage:
+        # Send back to INBOX for AI re-triage
+        from app.models import TicketStatus
+        ticket.update_status(TicketStatus.TRIAGE_PENDING)
+        target_queue = QueueType.INBOX
+    else:
+        # Use the queue set by unassign() (typically ASSIGNMENT)
+        target_queue = ticket.current_queue
 
     if old_queue == QueueType.ACTIVE:
         queue_manager.move_ticket(
             ticket_id=request.ticket_id,
             from_queue=QueueType.ACTIVE,
-            to_queue=ticket.current_queue,  # Use the queue set by unassign()
+            to_queue=target_queue,
             ticket=ticket,
-            reason=request.reason or "released by agent",
+            reason=request.reason or ("re-triage requested" if request.retriage else "released by agent"),
             actor=request.agent_id,
         )
     else:
+        # Enqueue to target queue (INBOX will trigger AI triage)
         queue_manager.enqueue(
             ticket=ticket,
-            queue=ticket.current_queue,  # Use the queue set by unassign()
-            reason=request.reason or "released by agent",
+            queue=target_queue,
+            reason=request.reason or ("re-triage requested" if request.retriage else "released by agent"),
             actor=request.agent_id,
         )
 
@@ -301,16 +314,25 @@ async def release_ticket(
         event_publisher.publish_ticket_moved,
         ticket,
         old_queue,
-        QueueType.ASSIGNMENT,
+        target_queue,
     )
+    
+    # If re-triaging, publish unassigned event
+    if request.retriage:
+        background_tasks.add_task(
+            event_publisher.publish_ticket_assigned,
+            ticket,
+            None,  # No new assignee
+            old_assignee,
+        )
 
     return AssignmentResponse(
         success=True,
         ticket_id=ticket.id,
         agent_id=request.agent_id,
         status=ticket.status.value,
-        queue=ticket.current_queue.value,
-        message="Ticket released successfully",
+        queue=target_queue.value,
+        message="Ticket released for re-triage" if request.retriage else "Ticket released successfully",
     )
 
 

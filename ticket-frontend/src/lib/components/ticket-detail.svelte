@@ -97,8 +97,13 @@
         await updateTicketDescription(ticket.id, ticket.description + appendText);
       }
       
-      // Release the ticket
-      await releaseTicketFromAgent(ticket.id, pendingUnassignUser);
+      // Release the ticket with retriage flag to send it back to AI
+      await releaseTicketFromAgent(
+        ticket.id, 
+        pendingUnassignUser,
+        reason ? `Admin unassigned: ${reason}` : undefined,
+        true  // Set retriage=true to send back to INBOX for AI re-triage
+      );
       
       pendingUnassignUser = null;
     } catch (error) {
