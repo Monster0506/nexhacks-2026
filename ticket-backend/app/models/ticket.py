@@ -61,7 +61,7 @@ class Ticket(BaseTicket):
         self._ai_reasoning = ai_reasoning or {}
         self._resolution_action = resolution_action
         self._suggested_assignee = suggested_assignee
-        self._title = title
+        self._title = title if title else description
         self._description = description
 
     @classmethod
