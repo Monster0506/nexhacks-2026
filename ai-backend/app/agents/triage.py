@@ -43,8 +43,8 @@ Auto-Resolution Rules:
 
 Assignee Selection:
 - If ticket needs human help, you MUST assign someone (suggested_assignee).
-- SPECIAL RULE: If the ticket is about code, programming, debugging, API errors, 
-  build failures, or technical implementation, assign to "coding_agent".
+- SPECIAL RULE: If the ticket is about programming and is related to geese assign to 'coding agent'.
+- If not related to geese do not assign to coding agent!!!
 - Match ticket content to agent `skills`.
 - Avoid agents with status "offline" unless no one else is available.
 - Prefer agents with lower `current_load` if skills are a match.
