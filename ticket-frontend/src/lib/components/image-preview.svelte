@@ -117,6 +117,8 @@
                 onerror={() => handleImageError(i)}
                 class="w-full h-auto object-contain"
                 style="max-height: {maxHeight}px"
+                referrerpolicy="no-referrer"
+                crossorigin="anonymous"
               />
             </button>
             
