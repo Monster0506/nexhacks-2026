@@ -315,6 +315,12 @@ class QueueManager:
         # Broadcast websocket events
         if suggested_assignee:
             await event_publisher.publish_ticket_assigned(ticket, suggested_assignee)
+            
+            # Trigger coding agent workflow if assigned to coding-agent
+            if suggested_assignee == "coding-agent":
+                print(f"[CODING-AGENT] Triggering coding agent for ticket {ticket.id}")
+                await event_publisher.publish_coding_agent_trigger(ticket)
+                
         await event_publisher.publish_ticket_moved(
             ticket, QueueType.INBOX, QueueType.ASSIGNMENT
         )
