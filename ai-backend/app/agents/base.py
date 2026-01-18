@@ -69,6 +69,7 @@ class BaseAgent(ABC):
              logger.info("LLM Call Successful")
              
              content = completion.choices[0].message.content
+             logger.info(f"LLM Response Content: {content}")
              
              if json_mode:
                  # Strip markdown code blocks if present
