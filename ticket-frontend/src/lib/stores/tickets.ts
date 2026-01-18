@@ -31,10 +31,10 @@ export interface AIReasoning {
 }
 
 // Backend status types matching the backend enums
-export type BackendTicketStatus = "INBOX" | "TRIAGE_PENDING" | "ASSIGNED" | "IN_PROGRESS" | "RESOLVED" | "CLOSED"
+export type BackendTicketStatus = "INBOX" | "TRIAGING" | "TRIAGE_PENDING" | "ASSIGNED" | "IN_PROGRESS" | "RESOLVED" | "CLOSED"
 
 // Frontend status maps to backend status
-export type TicketStatus = "inbox" | "triage_pending" | "assigned" | "in_progress" | "resolved" | "closed"
+export type TicketStatus = "inbox" | "triaging" | "triage_pending" | "assigned" | "in_progress" | "resolved" | "closed"
 export type TicketPriority = "low" | "medium" | "high" | "critical"
 
 export interface Ticket {
@@ -70,6 +70,8 @@ export function getStatusLabel(status: TicketStatus): string {
   switch (status) {
     case 'inbox':
       return 'Inbox'
+    case 'triaging':
+      return 'AI Triaging'
     case 'triage_pending':
       return 'Triage Pending'
     case 'assigned':
@@ -90,8 +92,10 @@ export function getStatusColor(status: TicketStatus): string {
   switch (status) {
     case 'inbox':
       return 'bg-muted text-muted-foreground'
+    case 'triaging':
+      return 'bg-yellow-500/10 text-yellow-500 animate-pulse'
     case 'triage_pending':
-      return 'bg-yellow-500/10 text-yellow-500'
+      return 'bg-orange-500/10 text-orange-500' // Changed from yellow to avoid confusion
     case 'assigned':
       return 'bg-blue-500/10 text-blue-500'
     case 'in_progress':
@@ -299,10 +303,12 @@ export const tickets: Readable<Ticket[]> = derived(
 export const ticketsByStatus: Readable<Record<TicketStatus, Ticket[]>> = derived(tickets, ($tickets: Ticket[]) => {
   return {
     inbox: $tickets.filter((t: Ticket) => t.status === 'inbox'),
+    triaging: $tickets.filter((t: Ticket) => t.status === 'triaging'),
     triage_pending: $tickets.filter((t: Ticket) => t.status === 'triage_pending'),
     assigned: $tickets.filter((t: Ticket) => t.status === 'assigned'),
     in_progress: $tickets.filter((t: Ticket) => t.status === 'in_progress'),
     resolved: $tickets.filter((t: Ticket) => t.status === 'resolved'),
+    closed: $tickets.filter((t: Ticket) => t.status === 'closed'),
   }
 })
 

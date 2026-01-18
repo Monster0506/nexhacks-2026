@@ -8,6 +8,6 @@ class Config:
     OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
     
     # Model configuration
-    TRIAGE_MODEL = os.getenv("TRIAGE_MODEL", "mistralai/devstral-2512:free")
-    CODE_MODEL = os.getenv("CODE_MODEL", "mistralai/devstral-2512:free")
-    SUPPORT_MODEL = os.getenv("SUPPORT_MODEL", "mistralai/devstral-2512:free") # Using free/fast model for support too
+    TRIAGE_MODEL = os.getenv("TRIAGE_MODEL", "google/gemini-3-flash-preview")
+    CODE_MODEL = os.getenv("CODE_MODEL", "google/gemini-3-flash-preview")
+    SUPPORT_MODEL = os.getenv("SUPPORT_MODEL", "google/gemini-3-flash-preview") # Using free/fast model for support too
