@@ -24,7 +24,8 @@
   // Initialize image states when URLs change
   $effect(() => {
     images = urls.map(url => ({
-      url,
+      // Use backend proxy to avoid CORS/mixed content issues
+      url: `/api/proxy/image?url=${encodeURIComponent(url)}`,
       loading: true,
       error: false,
       expanded: false
@@ -117,8 +118,6 @@
                 onerror={() => handleImageError(i)}
                 class="w-full h-auto object-contain"
                 style="max-height: {maxHeight}px"
-                referrerpolicy="no-referrer"
-                crossorigin="anonymous"
               />
             </button>
             
