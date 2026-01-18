@@ -165,9 +165,10 @@
   }
   
   async function handleSaveDescription(): Promise<void> {
-    if (editedDescription.trim() && editedDescription !== ticket.description) {
+    const newDescription = editedDescription.trim();
+    if (newDescription !== ticket.description) {
       try {
-        await updateTicketDescription(ticket.id, editedDescription.trim());
+        await updateTicketDescription(ticket.id, newDescription);
         // Don't mutate ticket directly - the store will reload tickets
       } catch (error) {
         console.error('Failed to save description:', error);

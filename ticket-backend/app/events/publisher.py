@@ -100,7 +100,7 @@ class EventPublisher:
         # Prepare content for AI analysis (TicketData schema)
         content_data = {
             "subject": ticket.title,
-            "body": ticket.content.extract_body(),
+            "body": ticket.description,
             "message_text": getattr(ticket.content, "message_text", None),
             "issue_title": getattr(ticket.content, "issue_title", None),
         }
