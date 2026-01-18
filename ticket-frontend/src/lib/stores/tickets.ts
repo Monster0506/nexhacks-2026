@@ -480,6 +480,7 @@ function handleWebSocketEvent(event: TicketEvent): void {
               const name = event.data.assignee as string
               return {
                 ...t,
+                status: 'assigned' as TicketStatus,
                 assignee: {
                   name,
                   avatar: name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),

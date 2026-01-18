@@ -43,7 +43,7 @@
   );
   
   // Check if status changes should be disabled (for triage tickets)
-  let isStatusLocked = $derived(ticket.status === 'triage_pending');
+  let isStatusLocked = $derived(ticket.status === 'triage_pending' || ticket.status === 'triaging');
   
   // Only admin can delete tickets
   let canDelete = $derived($currentUser?.id === 'user-0');
