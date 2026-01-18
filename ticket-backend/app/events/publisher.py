@@ -33,11 +33,15 @@ class EventPublisher:
                 "ticket_id": ticket.id,
                 "source": ticket.source.value,
                 "queue": ticket.current_queue.value,
-                "priority": ticket.priority.value,
                 "sender": ticket.content.sender,
                 "title": ticket.title,
                 "description": ticket.description,
-                "content": ticket.content.extract_body(),
+                "content": {
+                    "subject": ticket.title,
+                    "body": ticket.description,
+                    "message_text": getattr(ticket.content, "message_text", None),
+                    "issue_title": getattr(ticket.content, "issue_title", None),
+                },
             },
             ticket=ticket,
         )
