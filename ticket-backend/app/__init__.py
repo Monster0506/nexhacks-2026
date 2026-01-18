@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import tickets_router, queues_router, distribution_router, proxy_router
+from app.routes import tickets_router, queues_router, distribution_router
 
 
 def create_app() -> FastAPI:
@@ -29,6 +29,5 @@ def create_app() -> FastAPI:
     app.include_router(tickets_router)
     app.include_router(queues_router)
     app.include_router(distribution_router)
-    app.include_router(proxy_router)
 
     return app
