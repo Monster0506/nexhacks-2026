@@ -15,6 +15,7 @@ export const users: User[] = [
   { id: "user-5", name: "UI Designer" },
   { id: "user-6", name: "AI Engineer" },
   { id: "user-7", name: "Network Engineer" },
+  { id: "coding-agent", name: "Coding Agent" },
 ];
 
 // Local storage key for persisting user
