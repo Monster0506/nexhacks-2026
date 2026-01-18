@@ -53,6 +53,7 @@ class TicketSource(str, Enum):
     GITHUB = "GITHUB"
     FORM = "FORM"
     WEBHOOK = "WEBHOOK"
+    SMS = "SMS"
 
 
 class AutoResolveAction(str, Enum):
