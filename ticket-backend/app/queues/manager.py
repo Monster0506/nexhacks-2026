@@ -178,6 +178,7 @@ class QueueManager:
             try:
                 import asyncio
                 from app.services.ai_client import ai_client
+                from app.events import event_publisher
 
                 async def auto_resolve_task():
                     print(f"[AUTO-RESOLVE] Attempting auto-resolution for ticket {ticket.id}")
@@ -198,11 +199,20 @@ class QueueManager:
                             ticket,
                             reason=f"AI Auto-Resolved from docs: {', '.join(source_docs) if source_docs else 'unknown'}",
                         )
+                        
+                        # Broadcast websocket event for auto-resolution
+                        await event_publisher.publish_ticket_moved(
+                            ticket, QueueType.INBOX, QueueType.RESOLUTION
+                        )
+                        await event_publisher.publish_ticket_updated(
+                            ticket, {"auto_resolved": True, "status": "RESOLVED"}
+                        )
+                        
                         print(f"[AUTO-RESOLVE] Ticket {ticket.id} auto-resolved using: {source_docs}")
                     else:
                         # Fallback to human assignment
                         print(f"[AUTO-RESOLVE] Support agent confidence too low, falling back to assignment")
-                        self._assign_to_human(ticket, result, conf)
+                        await self._assign_to_human_async(ticket, result, conf)
 
                 # Get or create event loop to run background task
                 try:
@@ -229,9 +239,19 @@ class QueueManager:
                 ticket,
                 reason=f"AI Triage Needed (Confidence: {conf})",
             )
+            # Broadcast websocket event
+            import asyncio
+            from app.events import event_publisher
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(event_publisher.publish_ticket_moved(
+                    ticket, QueueType.INBOX, QueueType.TRIAGE
+                ))
+            except RuntimeError:
+                pass  # No event loop available
 
     def _assign_to_human(self, ticket: Ticket, result: dict, conf: float) -> None:
-        """Helper to assign ticket to a human agent."""
+        """Helper to assign ticket to a human agent (sync version)."""
         from app.models import TicketStatus
 
         suggested_assignee = result.get("suggested_assignee")
@@ -247,6 +267,48 @@ class QueueManager:
             ticket,
             reason=f"AI Auto-Triage (Confidence: {conf})",
         )
+        
+        # Broadcast websocket event
+        import asyncio
+        from app.events import event_publisher
+        try:
+            loop = asyncio.get_running_loop()
+            if suggested_assignee:
+                loop.create_task(event_publisher.publish_ticket_assigned(
+                    ticket, suggested_assignee
+                ))
+            loop.create_task(event_publisher.publish_ticket_moved(
+                ticket, QueueType.INBOX, QueueType.ASSIGNMENT
+            ))
+        except RuntimeError:
+            pass  # No event loop available
+
+    async def _assign_to_human_async(self, ticket: Ticket, result: dict, conf: float) -> None:
+        """Helper to assign ticket to a human agent (async version with events)."""
+        from app.models import TicketStatus
+        from app.events import event_publisher
+
+        suggested_assignee = result.get("suggested_assignee")
+        if suggested_assignee:
+            ticket.assign(suggested_assignee)
+        else:
+            ticket.update_status(TicketStatus.ASSIGNED)
+        
+        self.move_ticket(
+            ticket.id,
+            QueueType.INBOX,
+            QueueType.ASSIGNMENT,
+            ticket,
+            reason=f"AI Auto-Triage (Confidence: {conf})",
+        )
+        
+        # Broadcast websocket events
+        if suggested_assignee:
+            await event_publisher.publish_ticket_assigned(ticket, suggested_assignee)
+        await event_publisher.publish_ticket_moved(
+            ticket, QueueType.INBOX, QueueType.ASSIGNMENT
+        )
+
 
     def dequeue(self, queue: QueueType, priority_based: bool = True) -> Optional[str]:
         """
