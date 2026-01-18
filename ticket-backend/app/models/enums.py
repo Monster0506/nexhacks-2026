@@ -58,6 +58,7 @@ class TicketSource(str, Enum):
 class AutoResolveAction(str, Enum):
     """Actions that can be taken for auto-resolution."""
 
+    MANUAL = "MANUAL"
     FAQ_LINK = "FAQ_LINK"
     DUPLICATE_CLOSE = "DUPLICATE_CLOSE"
     SELF_SERVICE_REDIRECT = "SELF_SERVICE_REDIRECT"
