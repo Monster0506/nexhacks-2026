@@ -19,7 +19,7 @@
   };
   
   // Check if assigned to coding_agent
-  let isCodingAgent = $derived(ticket.assignee?.id === 'coding_agent' || ticket.suggestedAssignee === 'coding_agent');
+  let isCodingAgent = $derived(ticket.assignee?.id === 'coding-agent' || ticket.suggestedAssignee === 'coding-agent');
   
   function formatTimeAgo(dateString: string): string {
     const date = new Date(dateString);

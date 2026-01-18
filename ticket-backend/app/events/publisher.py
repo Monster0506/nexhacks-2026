@@ -13,6 +13,7 @@ import os
 
 load_dotenv()
 webhook_url = os.getenv("N8N_AI_WEBHOOK_URL")
+print(f"N8N AI Webhook URL: {webhook_url}")
 
 
 class EventPublisher:
