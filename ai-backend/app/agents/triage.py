@@ -6,12 +6,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class TriageAgent(BaseAgent):
     def __init__(self):
         super().__init__(model=Config.TRIAGE_MODEL)
 
     async def analyze(self, ticket: TicketData) -> TriageResult:
-        logger.info(f"Analyzing ticket for triage: {ticket.ticket_id if hasattr(ticket, 'ticket_id') else 'new'}")
+        logger.info(
+            f"Analyzing ticket for triage: {ticket.ticket_id if hasattr(ticket, 'ticket_id') else 'new'}"
+        )
         system_prompt = """
 You are a ticket triage classifier. Analyze the ticket and output JSON.
 
@@ -44,13 +47,13 @@ Output schema:
   "estimated_resolution_time_hours": 0
 }
 """
-        
+
         # Format available agents for the prompt
         agents_context = "No agent data available."
-        if hasattr(ticket, 'available_agents') and ticket.available_agents:
+        if hasattr(ticket, "available_agents") and ticket.available_agents:
             agents_list = []
             for agent in ticket.available_agents:
-                skills_str = ", ".join(agent.get('skills', []))
+                skills_str = ", ".join(agent.get("skills", []))
                 agents_list.append(
                     f"- ID: {agent.get('id')} | Name: {agent.get('name')} | "
                     f"Status: {agent.get('status')} | Load: {agent.get('current_load')} | "
@@ -67,16 +70,15 @@ Message: {ticket.content.message_text}
 Available Agents:
 {agents_context}
 """
-        
+
         result_json = await self._call_llm(
-            system_prompt=system_prompt,
-            user_content=user_content,
-            temperature=0.3
+            system_prompt=system_prompt, user_content=user_content, temperature=0.3
         )
-        
+
         # Parse and validate with Pydantic
         # Ensure fields map correctly or defaults are handled
         return TriageResult(**result_json)
+
 
 # Singleton instance
 triage_agent = TriageAgent()

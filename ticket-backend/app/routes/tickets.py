@@ -30,8 +30,10 @@ router = APIRouter(prefix="/api/tickets", tags=["tickets"])
 
 # Request/Response Models
 
+
 class EmailPayload(BaseModel):
     """Email content payload."""
+
     sender_email: str = Field(..., alias="from")
     recipient_email: str = Field(..., alias="to")
     subject: str
@@ -45,6 +47,7 @@ class EmailPayload(BaseModel):
 
 class DiscordPayload(BaseModel):
     """Discord content payload."""
+
     channel_id: str
     user_id: str
     message_id: str
@@ -56,6 +59,7 @@ class DiscordPayload(BaseModel):
 
 class GitHubPayload(BaseModel):
     """GitHub content payload."""
+
     repo: str
     issue_number: int
     author: str
@@ -68,6 +72,7 @@ class GitHubPayload(BaseModel):
 
 class FormPayload(BaseModel):
     """Form submission payload."""
+
     form_fields: dict[str, Any] = Field(..., alias="fields")
     submission_time: Optional[str] = None
     form_id: Optional[str] = None
@@ -80,6 +85,7 @@ class FormPayload(BaseModel):
 
 class IngestRequest(BaseModel):
     """Request body for ticket ingestion."""
+
     source: TicketSource
     content_type: str
     payload: dict[str, Any]
@@ -88,6 +94,7 @@ class IngestRequest(BaseModel):
 
 class IngestResponse(BaseModel):
     """Response after ticket ingestion."""
+
     ticket_id: str
     status: str
     queue: str
@@ -98,6 +105,7 @@ class IngestResponse(BaseModel):
 
 class TriageCompleteRequest(BaseModel):
     """Request body for triage completion."""
+
     category: TicketCategory
     priority: TicketPriority
     suggested_assignee: Optional[str] = None
@@ -108,6 +116,7 @@ class TriageCompleteRequest(BaseModel):
 
 class TicketUpdateRequest(BaseModel):
     """Request body for ticket updates."""
+
     title: Optional[str] = None
     description: Optional[str] = None
     status: Optional[TicketStatus] = None
@@ -119,11 +128,13 @@ class TicketUpdateRequest(BaseModel):
 
 class TicketResponse(BaseModel):
     """Standard ticket response."""
+
     ticket: dict[str, Any]
 
 
 class TicketListResponse(BaseModel):
     """Response for listing tickets."""
+
     tickets: list[dict[str, Any]]
     total: int
     limit: int
@@ -131,6 +142,7 @@ class TicketListResponse(BaseModel):
 
 
 # Helper functions
+
 
 def parse_timestamp(ts: Optional[str]) -> datetime:
     """Parse timestamp string to datetime."""
@@ -147,8 +159,13 @@ def create_content_from_payload(content_type: str, payload: dict[str, Any]):
         # Handle unified payload structure where all sources send the same fields
         # For email, use 'id' as thread_id and provide default values for missing fields
         return EmailContent(
-            sender_email=payload.get("from", payload.get("sender_email", payload.get("user", "unknown@unknown.com"))),
-            recipient_email=payload.get("to", payload.get("recipient_email", "nexhacks2026@gmail.com")),
+            sender_email=payload.get(
+                "from",
+                payload.get("sender_email", payload.get("user", "unknown@unknown.com")),
+            ),
+            recipient_email=payload.get(
+                "to", payload.get("recipient_email", "nexhacks2026@gmail.com")
+            ),
             subject=payload.get("subject", "No Subject"),
             body=payload.get("body", ""),
             timestamp=parse_timestamp(payload.get("timestamp")),
@@ -173,12 +190,14 @@ def create_content_from_payload(content_type: str, payload: dict[str, Any]):
             repo = "/".join(repo.rstrip("/").split("/")[-2:])
         elif repo == "null":
             repo = "unknown/unknown"
-            
+
         return GitHubContent(
             repo=repo,
             issue_number=payload.get("issue_number", 0),
             author=payload.get("author", payload.get("user", "unknown")),
-            issue_title=payload.get("title", payload.get("issue_title", payload.get("subject", ""))),
+            issue_title=payload.get(
+                "title", payload.get("issue_title", payload.get("subject", ""))
+            ),
             issue_body=payload.get("body", payload.get("issue_body", "")),
             timestamp=parse_timestamp(payload.get("timestamp")),
             labels=payload.get("labels"),
@@ -187,7 +206,9 @@ def create_content_from_payload(content_type: str, payload: dict[str, Any]):
     elif content_type == "form":
         return FormContent(
             form_fields=payload.get("fields", payload.get("form_fields", {})),
-            submission_time=parse_timestamp(payload.get("submission_time", payload.get("timestamp"))),
+            submission_time=parse_timestamp(
+                payload.get("submission_time", payload.get("timestamp"))
+            ),
             form_id=payload.get("form_id", payload.get("id")),
             submitter_email=payload.get("submitter_email"),
             submitter_name=payload.get("submitter_name", payload.get("user")),
@@ -197,6 +218,7 @@ def create_content_from_payload(content_type: str, payload: dict[str, Any]):
 
 
 # Endpoints
+
 
 @router.post("/ingest", response_model=IngestResponse, status_code=202)
 async def ingest_ticket(
@@ -232,7 +254,7 @@ async def ingest_ticket(
         priority=priority,
         tags=tags,
     )
-    
+
     # Set status to TRIAGE_PENDING for immediate feedback (shows in Inbox)
     ticket.update_status(TicketStatus.TRIAGE_PENDING)
 
@@ -244,9 +266,15 @@ async def ingest_ticket(
             title_candidate = request.metadata.get("title")
 
     if not title_candidate:
-        payload_fields = request.payload.get("fields") if isinstance(request.payload, dict) else None
+        payload_fields = (
+            request.payload.get("fields") if isinstance(request.payload, dict) else None
+        )
         if not payload_fields:
-            payload_fields = request.payload.get("form_fields") if isinstance(request.payload, dict) else None
+            payload_fields = (
+                request.payload.get("form_fields")
+                if isinstance(request.payload, dict)
+                else None
+            )
 
         if isinstance(payload_fields, dict):
             if "subject" in payload_fields:
@@ -317,7 +345,7 @@ async def triage_complete(
     if ticket.current_queue != QueueType.TRIAGE:
         raise HTTPException(
             status_code=400,
-            detail=f"Ticket is not in TRIAGE queue (currently in {ticket.current_queue.value})"
+            detail=f"Ticket is not in TRIAGE queue (currently in {ticket.current_queue.value})",
         )
 
     # Apply triage results
@@ -336,7 +364,12 @@ async def triage_complete(
     if request.auto_resolve:
         # Auto-resolve bypasses ACTIVE queue
         from app.models import AutoResolveAction
-        ticket.mark_resolved(AutoResolveAction.FAQ_LINK if request.resolution_reason else AutoResolveAction.NONE)
+
+        ticket.mark_resolved(
+            AutoResolveAction.FAQ_LINK
+            if request.resolution_reason
+            else AutoResolveAction.NONE
+        )
         queue_manager.move_ticket(
             ticket_id=ticket_id,
             from_queue=QueueType.TRIAGE,
@@ -476,10 +509,14 @@ async def list_tickets(
 
     total = ticket_repository.count()
 
-    logger.info(f"Listing tickets with filters: status={status}, queue={queue}, priority={priority}, category={category}")
+    logger.info(
+        f"Listing tickets with filters: status={status}, queue={queue}, priority={priority}, category={category}"
+    )
     logger.info(f"Found {len(tickets)} tickets. Total in repository: {total}")
     for t in tickets:
-        logger.info(f"Ticket: {t.id} - {t.title} - Status: {t.status} - Queue: {t.current_queue}")
+        logger.info(
+            f"Ticket: {t.id} - {t.title} - Status: {t.status} - Queue: {t.current_queue}"
+        )
 
     return TicketListResponse(
         tickets=[t.to_dict() for t in tickets],
@@ -495,16 +532,20 @@ async def delete_ticket(ticket_id: str, background_tasks: BackgroundTasks):
     ticket = ticket_repository.get(ticket_id)
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
-    
+
     # Remove from queue if present
     position = queue_manager.get_queue_position(ticket_id)
     if position:
         queue_name, _ = position
         queue_manager.remove_from_queue(ticket_id, queue_name)
-    
+
     # Delete from repository
     deleted = ticket_repository.delete(ticket_id)
     if not deleted:
         raise HTTPException(status_code=500, detail="Failed to delete ticket")
-    
-    return {"success": True, "ticket_id": ticket_id, "message": "Ticket deleted successfully"}
+
+    return {
+        "success": True,
+        "ticket_id": ticket_id,
+        "message": "Ticket deleted successfully",
+    }

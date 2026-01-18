@@ -15,8 +15,10 @@ router = APIRouter(prefix="/api/distribution", tags=["distribution"])
 
 # Request/Response Models
 
+
 class ClaimRequest(BaseModel):
     """Request to claim the next available ticket."""
+
     agent_id: str
     preferred_categories: Optional[list[str]] = None
     max_priority: Optional[str] = None
@@ -24,6 +26,7 @@ class ClaimRequest(BaseModel):
 
 class AssignRequest(BaseModel):
     """Request to assign a specific ticket to an agent."""
+
     ticket_id: str
     agent_id: str
     reason: Optional[str] = None
@@ -31,6 +34,7 @@ class AssignRequest(BaseModel):
 
 class ReleaseRequest(BaseModel):
     """Request to release a ticket back to the assignment queue."""
+
     ticket_id: str
     agent_id: str
     reason: Optional[str] = None
@@ -38,6 +42,7 @@ class ReleaseRequest(BaseModel):
 
 class TransferRequest(BaseModel):
     """Request to transfer a ticket to another agent."""
+
     ticket_id: str
     from_agent_id: str
     to_agent_id: str
@@ -46,6 +51,7 @@ class TransferRequest(BaseModel):
 
 class ClaimResponse(BaseModel):
     """Response after claiming a ticket."""
+
     success: bool
     ticket_id: Optional[str]
     ticket: Optional[dict[str, Any]]
@@ -54,6 +60,7 @@ class ClaimResponse(BaseModel):
 
 class AssignmentResponse(BaseModel):
     """Response for assignment operations."""
+
     success: bool
     ticket_id: str
     agent_id: str
@@ -64,18 +71,21 @@ class AssignmentResponse(BaseModel):
 
 class AvailableTicketsResponse(BaseModel):
     """Response for available tickets."""
+
     tickets: list[dict[str, Any]]
     count: int
 
 
 class AgentTicketsResponse(BaseModel):
     """Response for agent's assigned tickets."""
+
     agent_id: str
     tickets: list[dict[str, Any]]
     count: int
 
 
 # Endpoints
+
 
 @router.post("/claim", response_model=ClaimResponse)
 async def claim_ticket(
@@ -116,6 +126,7 @@ async def claim_ticket(
         # Apply category filter if specified
         if request.preferred_categories:
             from app.models import TicketCategory
+
             if ticket.category:
                 if ticket.category.value not in request.preferred_categories:
                     continue
@@ -123,6 +134,7 @@ async def claim_ticket(
         # Apply priority filter if specified
         if request.max_priority:
             from app.models import TicketPriority
+
             priority_order = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
             max_idx = priority_order.index(request.max_priority.upper())
             ticket_idx = priority_order.index(ticket.priority.value)
@@ -437,7 +449,9 @@ async def get_agent_stats(agent_id: str):
             cat = ticket.category.value if ticket.category else "UNCATEGORIZED"
             stats["by_category"][cat] = stats["by_category"].get(cat, 0) + 1
 
-            stats["by_status"][ticket.status.value] = stats["by_status"].get(ticket.status.value, 0) + 1
+            stats["by_status"][ticket.status.value] = (
+                stats["by_status"].get(ticket.status.value, 0) + 1
+            )
 
     return {
         "agent_id": agent_id,

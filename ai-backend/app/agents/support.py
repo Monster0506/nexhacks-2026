@@ -6,15 +6,18 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class SupportAgent(BaseAgent):
     def __init__(self):
         super().__init__(model=Config.SUPPORT_MODEL)
 
     async def analyze(self, request: SupportAnalysisRequest) -> SupportAnalysisResult:
-        logger.info(f"Analyzing support request for ticket: {request.ticket.ticket_id if hasattr(request.ticket, 'ticket_id') else 'new'}")
+        logger.info(
+            f"Analyzing support request for ticket: {request.ticket.ticket_id if hasattr(request.ticket, 'ticket_id') else 'new'}"
+        )
         ticket = request.ticket
         context = request.context
-        
+
         faq_list_str = ""
         if context and context.faqs:
             for faq in context.faqs:
@@ -56,11 +59,10 @@ Available FAQs:
 """
 
         result_json = await self._call_llm(
-            system_prompt=system_prompt,
-            user_content=user_content,
-            temperature=0.1
+            system_prompt=system_prompt, user_content=user_content, temperature=0.1
         )
 
         return SupportAnalysisResult(**result_json)
+
 
 support_agent = SupportAgent()

@@ -11,6 +11,7 @@ from fastapi import WebSocket
 @dataclass
 class WebSocketClient:
     """Represents a connected WebSocket client."""
+
     client_id: str
     websocket: WebSocket
     subscriptions: set[str] = field(default_factory=set)
@@ -22,7 +23,9 @@ class ConnectionManager:
 
     def __init__(self):
         self._connections: dict[str, WebSocketClient] = {}
-        self._channel_subscribers: dict[str, set[str]] = {}  # channel -> set of client_ids
+        self._channel_subscribers: dict[str, set[str]] = (
+            {}
+        )  # channel -> set of client_ids
 
     async def connect(self, websocket: WebSocket, client_id: str) -> None:
         """Accept and register a new WebSocket connection."""
@@ -63,7 +66,7 @@ class ConnectionManager:
                 "event": "subscribed",
                 "channel": channel,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-            }
+            },
         )
         return True
 
@@ -85,7 +88,7 @@ class ConnectionManager:
                 "event": "unsubscribed",
                 "channel": channel,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-            }
+            },
         )
         return True
 

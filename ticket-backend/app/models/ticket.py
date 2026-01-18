@@ -21,6 +21,7 @@ from .enums import (
 
 class InvalidStateTransitionError(Exception):
     """Raised when an invalid state transition is attempted."""
+
     pass
 
 
@@ -147,13 +148,13 @@ class Ticket(BaseTicket):
             return self._title
         # Fallback to extracting from content
         content_dict = self._content.to_dict()
-        if 'subject' in content_dict:
-            return content_dict['subject']
-        elif 'issue_title' in content_dict:
-            return content_dict['issue_title']
-        elif 'message_text' in content_dict:
-            return content_dict['message_text'][:100]
-        return 'Untitled Ticket'
+        if "subject" in content_dict:
+            return content_dict["subject"]
+        elif "issue_title" in content_dict:
+            return content_dict["issue_title"]
+        elif "message_text" in content_dict:
+            return content_dict["message_text"][:100]
+        return "Untitled Ticket"
 
     @property
     def description(self) -> str:
@@ -162,13 +163,13 @@ class Ticket(BaseTicket):
             return self._description
         # Fallback to extracting from content
         content_dict = self._content.to_dict()
-        if 'body' in content_dict:
-            return content_dict['body']
-        elif 'issue_body' in content_dict:
-            return content_dict['issue_body']
-        elif 'message_text' in content_dict:
-            return content_dict['message_text']
-        return ''
+        if "body" in content_dict:
+            return content_dict["body"]
+        elif "issue_body" in content_dict:
+            return content_dict["issue_body"]
+        elif "message_text" in content_dict:
+            return content_dict["message_text"]
+        return ""
 
     def _touch(self) -> None:
         """Update the updated_at timestamp."""
@@ -181,7 +182,7 @@ class Ticket(BaseTicket):
     def move_to_queue(self, queue: QueueType) -> None:
         """Move ticket to a different queue with state validation."""
         new_status = QUEUE_STATUS_MAP[queue]
-        
+
         # Allow moving to INBOX from any state (reset/escalation)
         if queue == QueueType.INBOX:
             self._status = TicketStatus.INBOX

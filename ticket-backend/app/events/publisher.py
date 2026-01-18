@@ -11,7 +11,7 @@ from app.websockets import connection_manager
 from dotenv import load_dotenv
 import os
 
-load_dotenv()                   
+load_dotenv()
 webhook_url = os.getenv("N8N_AI_WEBHOOK_URL")
 
 
@@ -39,7 +39,9 @@ class EventPublisher:
             ticket=ticket,
         )
 
-    async def publish_ticket_updated(self, ticket: Ticket, changes: dict[str, Any]) -> None:
+    async def publish_ticket_updated(
+        self, ticket: Ticket, changes: dict[str, Any]
+    ) -> None:
         """Publish ticket.updated event."""
         await self._publish_event(
             event_type="ticket.updated",
@@ -93,7 +95,7 @@ class EventPublisher:
     async def publish_ticket_triage_pending(self, ticket: Ticket) -> None:
         """Publish ticket.triage_pending event - triggers n8n AI workflow."""
         from app.services.user_service import user_service
-        
+
         await self._publish_event(
             event_type="ticket.triage_pending",
             data={
@@ -106,7 +108,9 @@ class EventPublisher:
             ticket=ticket,
         )
 
-    async def publish_queue_stats(self, queue: QueueType, stats: dict[str, Any]) -> None:
+    async def publish_queue_stats(
+        self, queue: QueueType, stats: dict[str, Any]
+    ) -> None:
         """Publish queue.stats event."""
         await connection_manager.broadcast_event(
             event_type="queue.stats",
@@ -116,12 +120,13 @@ class EventPublisher:
             },
             channels=["all", f"queue.{queue.value}"],
         )
-        
 
     async def publish_coding_agent_trigger(self, ticket: Ticket) -> None:
-        """Trigger n8n webhook for coding agent when a ticket has coding tags """
-        print(f"Triggering coding agent for ticket {ticket.id} (Priority: {ticket.priority.value})")
-        
+        """Trigger n8n webhook for coding agent when a ticket has coding tags"""
+        print(
+            f"Triggering coding agent for ticket {ticket.id} (Priority: {ticket.priority.value})"
+        )
+
         payload = {
             "ticket_id": ticket.id,
             "tags": ticket.tags,
@@ -131,7 +136,7 @@ class EventPublisher:
                 "subject": ticket.title,
                 "body": ticket.content.extract_body(),
                 "sender": ticket.content.sender,
-            }
+            },
         }
         try:
             async with httpx.AsyncClient() as client:

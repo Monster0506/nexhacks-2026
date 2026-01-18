@@ -113,7 +113,8 @@ class TicketRepository:
         """Get tickets in assignment queue that don't have an assignee yet."""
         with self._lock:
             return [
-                t for t in self._tickets.values()
+                t
+                for t in self._tickets.values()
                 if t.current_queue == QueueType.ASSIGNMENT and t.assignee is None
             ]
 

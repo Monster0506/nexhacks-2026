@@ -367,7 +367,9 @@ class FormContent(TicketContent):
     def from_dict(cls, data: dict[str, Any]) -> "FormContent":
         submission_time = data.get("submission_time")
         if isinstance(submission_time, str):
-            submission_time = datetime.fromisoformat(submission_time.replace("Z", "+00:00"))
+            submission_time = datetime.fromisoformat(
+                submission_time.replace("Z", "+00:00")
+            )
         return cls(
             form_fields=data["form_fields"],
             submission_time=submission_time,
@@ -380,7 +382,7 @@ class FormContent(TicketContent):
 def content_from_dict(data: dict[str, Any]) -> TicketContent:
     """Factory function to create the appropriate content type from a dictionary."""
     content_type = data.get("type", "").lower()
-    
+
     if content_type == "email":
         return EmailContent.from_dict(data)
     elif content_type == "discord":

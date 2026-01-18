@@ -12,6 +12,7 @@ from app.models import QueueType, Ticket
 @dataclass
 class QueueEntry:
     """Represents an entry in a queue with metadata."""
+
     ticket_id: str
     enqueued_at: datetime
     priority_score: int = 0  # Higher = more urgent
@@ -20,6 +21,7 @@ class QueueEntry:
 @dataclass
 class QueueStats:
     """Statistics for a queue."""
+
     queue_type: QueueType
     count: int
     avg_wait_time_seconds: float
@@ -39,6 +41,7 @@ class QueueStats:
 @dataclass
 class AuditLogEntry:
     """Audit log entry for queue transitions."""
+
     timestamp: datetime
     ticket_id: str
     from_queue: Optional[QueueType]
@@ -104,11 +107,11 @@ class QueueManager:
 
             # Trigger AI Triage if enqueued to INBOX
             if queue == QueueType.INBOX:
-                
+
                 try:
                     import asyncio
                     from app.services.ai_client import ai_client
-                    
+
                     async def run_triage_task():
                         # Simple background task wrapper
                         result = await ai_client.analyze_triage(ticket)
@@ -121,7 +124,7 @@ class QueueManager:
                     except RuntimeError:
                         loop = asyncio.new_event_loop()
                         asyncio.set_event_loop(loop)
-                    
+
                     loop.create_task(run_triage_task())
                 except Exception as e:
                     print(f"Failed to trigger AI triage: {e}")
@@ -135,43 +138,45 @@ class QueueManager:
         """
         # Update ticket fields
         ticket.log_reasoning(result)
-        
+
         # Update Priority
         if result.get("priority"):
             from app.models import TicketPriority
+
             try:
                 ticket.update_priority(TicketPriority(result["priority"]))
             except ValueError:
                 pass
-        
+
         # Update Category
         if result.get("category"):
             from app.models import TicketCategory
+
             try:
                 ticket.set_category(TicketCategory(result["category"]))
             except ValueError:
                 pass
-                
+
         # Determine queue move based on confidence
         conf = result.get("confidence", 0)
-        
+
         # >= 0.8: High confidence -> Auto-assign (move to ASSIGNMENT)
         if conf >= 0.8:
             self.move_ticket(
-                ticket.id, 
-                QueueType.INBOX, 
-                QueueType.ASSIGNMENT, 
-                ticket, 
-                reason=f"AI Auto-Triage (Confidence: {conf})"
+                ticket.id,
+                QueueType.INBOX,
+                QueueType.ASSIGNMENT,
+                ticket,
+                reason=f"AI Auto-Triage (Confidence: {conf})",
             )
         else:
             # < 0.8: Low confidence -> Manual Triage (move to TRIAGE)
             self.move_ticket(
-                ticket.id, 
-                QueueType.INBOX, 
-                QueueType.TRIAGE, 
-                ticket, 
-                reason=f"AI Triage Needed (Confidence: {conf})"
+                ticket.id,
+                QueueType.INBOX,
+                QueueType.TRIAGE,
+                ticket,
+                reason=f"AI Triage Needed (Confidence: {conf})",
             )
 
     def dequeue(self, queue: QueueType, priority_based: bool = True) -> Optional[str]:
@@ -191,7 +196,9 @@ class QueueManager:
                 entry = entries[0]
                 self._queues[queue].remove(entry)
             else:
-                entry = self._queues[queue].pop() # FILO is pop(), FIFO would be popleft()
+                entry = self._queues[
+                    queue
+                ].pop()  # FILO is pop(), FIFO would be popleft()
 
             del self._ticket_queue_map[entry.ticket_id]
             return entry.ticket_id
@@ -275,7 +282,7 @@ class QueueManager:
                 )
 
             wait_times = [(now - e.enqueued_at).total_seconds() for e in entries]
-            
+
             return QueueStats(
                 queue_type=queue,
                 count=len(entries),
@@ -328,10 +335,10 @@ class QueueManager:
         """
         # Average processing times per queue (in seconds)
         avg_processing_times = {
-            QueueType.INBOX: 5,      # Quick ingestion
-            QueueType.TRIAGE: 30,    # AI processing
+            QueueType.INBOX: 5,  # Quick ingestion
+            QueueType.TRIAGE: 30,  # AI processing
             QueueType.ASSIGNMENT: 60,  # Human review
-            QueueType.ACTIVE: 300,   # Active work
+            QueueType.ACTIVE: 300,  # Active work
             QueueType.RESOLUTION: 60,  # Closure verification
         }
 

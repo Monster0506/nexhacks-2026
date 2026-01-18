@@ -25,13 +25,13 @@ async def websocket_endpoint(
 ):
     """
     WebSocket endpoint for real-time updates.
-    
+
     Connect with: ws://localhost:8000/ws?client_id=your-client-id
-    
+
     Send messages to subscribe/unsubscribe from channels:
     - {"action": "subscribe", "channel": "queue.TRIAGE"}
     - {"action": "unsubscribe", "channel": "queue.TRIAGE"}
-    
+
     Available channels:
     - "all" - All events (auto-subscribed)
     - "tickets.all" - All ticket events
@@ -59,19 +59,17 @@ async def websocket_endpoint(
                     await connection_manager.unsubscribe(client_id, channel)
                 elif action == "ping":
                     await connection_manager.send_personal_message(
-                        client_id,
-                        {"event": "pong", "timestamp": "now"}
+                        client_id, {"event": "pong", "timestamp": "now"}
                     )
                 else:
                     await connection_manager.send_personal_message(
                         client_id,
-                        {"event": "error", "message": f"Unknown action: {action}"}
+                        {"event": "error", "message": f"Unknown action: {action}"},
                     )
 
             except json.JSONDecodeError:
                 await connection_manager.send_personal_message(
-                    client_id,
-                    {"event": "error", "message": "Invalid JSON"}
+                    client_id, {"event": "error", "message": "Invalid JSON"}
                 )
 
     except WebSocketDisconnect:
@@ -112,4 +110,5 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -7,15 +7,18 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class CodeAgent(BaseAgent):
     def __init__(self):
         super().__init__(model=Config.CODE_MODEL)
 
     async def analyze(self, request: CodeAnalysisRequest) -> CodeAnalysisResult:
-        logger.info(f"Analyzing code request for ticket: {request.ticket.ticket_id if hasattr(request.ticket, 'ticket_id') else 'new'}")
+        logger.info(
+            f"Analyzing code request for ticket: {request.ticket.ticket_id if hasattr(request.ticket, 'ticket_id') else 'new'}"
+        )
         ticket = request.ticket
         context = request.code_context
-        
+
         related_files_str = ""
         if context and context.related_files:
             for f in context.related_files:
@@ -69,9 +72,10 @@ Related Files:
         result_json = await self._call_llm(
             system_prompt=system_prompt,
             user_content=user_content,
-            temperature=0.2 # Deterministic for code
+            temperature=0.2,  # Deterministic for code
         )
 
         return CodeAnalysisResult(**result_json)
+
 
 code_agent = CodeAgent()

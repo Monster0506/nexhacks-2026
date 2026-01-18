@@ -2,14 +2,17 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Any
 from datetime import datetime
 
+
 class TicketContent(BaseModel):
     subject: Optional[str] = None
     body: Optional[str] = None
     issue_title: Optional[str] = None
     message_text: Optional[str] = None
 
+
 class TicketData(BaseModel):
     """Simplified ticket data for AI analysis"""
+
     id: str
     content: TicketContent
     source: str
@@ -18,6 +21,7 @@ class TicketData(BaseModel):
     # List of available agents with their skills/load
     available_agents: List[dict] = []
 
+
 # --- Triage Models ---
 class TriageResult(BaseModel):
     category: str
@@ -25,9 +29,10 @@ class TriageResult(BaseModel):
     confidence: float
     reasoning: str
     suggested_assignee_team: Optional[str] = None
-    suggested_assignee: Optional[str] = None # ID of the suggested agent
+    suggested_assignee: Optional[str] = None  # ID of the suggested agent
     tags: List[str] = []
     estimated_resolution_time_hours: Optional[int] = None
+
 
 # --- Code Analysis Models ---
 class CodeContext(BaseModel):
@@ -35,9 +40,11 @@ class CodeContext(BaseModel):
     related_files: List[dict] = []
     error_snippet: Optional[str] = None
 
+
 class CodeAnalysisRequest(BaseModel):
     ticket: TicketData
     code_context: Optional[CodeContext] = None
+
 
 class CodeAnalysisResult(BaseModel):
     analysis: dict
@@ -46,6 +53,7 @@ class CodeAnalysisResult(BaseModel):
     pr_draft: Optional[dict] = None
     confidence: float
 
+
 # --- Support Models ---
 class FAQItem(BaseModel):
     id: str
@@ -53,16 +61,19 @@ class FAQItem(BaseModel):
     answer: str
     link: Optional[str] = None
 
+
 class SupportContext(BaseModel):
     faqs: List[FAQItem] = []
     # Could add past tickets here
+
 
 class SupportAnalysisRequest(BaseModel):
     ticket: TicketData
     context: Optional[SupportContext] = None
 
+
 class SupportAnalysisResult(BaseModel):
-    resolution_action: str # FAQ_LINK, DUPLICATE_CLOSE, SELF_SERVICE_REDIRECT, ESCALATE
+    resolution_action: str  # FAQ_LINK, DUPLICATE_CLOSE, SELF_SERVICE_REDIRECT, ESCALATE
     faq_match: Optional[dict] = None
     self_service: Optional[dict] = None
     confidence: float

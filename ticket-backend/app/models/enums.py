@@ -5,6 +5,7 @@ from enum import Enum
 
 class TicketStatus(str, Enum):
     """Status of a ticket in the system."""
+
     INBOX = "INBOX"
     TRIAGING = "TRIAGING"
     TRIAGE_PENDING = "TRIAGE_PENDING"
@@ -16,6 +17,7 @@ class TicketStatus(str, Enum):
 
 class TicketPriority(str, Enum):
     """Priority level of a ticket."""
+
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
@@ -24,6 +26,7 @@ class TicketPriority(str, Enum):
 
 class TicketCategory(str, Enum):
     """Category classification of a ticket."""
+
     BILLING = "BILLING"
     TECHNICAL_SUPPORT = "TECHNICAL_SUPPORT"
     FEATURE_REQUEST = "FEATURE_REQUEST"
@@ -34,6 +37,7 @@ class TicketCategory(str, Enum):
 
 class QueueType(str, Enum):
     """Types of queues in the ticket processing system."""
+
     INBOX = "INBOX"
     TRIAGE = "TRIAGE"
     ASSIGNMENT = "ASSIGNMENT"
@@ -43,6 +47,7 @@ class QueueType(str, Enum):
 
 class TicketSource(str, Enum):
     """Source of the ticket ingestion."""
+
     EMAIL = "EMAIL"
     DISCORD = "DISCORD"
     GITHUB = "GITHUB"
@@ -52,6 +57,7 @@ class TicketSource(str, Enum):
 
 class AutoResolveAction(str, Enum):
     """Actions that can be taken for auto-resolution."""
+
     FAQ_LINK = "FAQ_LINK"
     DUPLICATE_CLOSE = "DUPLICATE_CLOSE"
     SELF_SERVICE_REDIRECT = "SELF_SERVICE_REDIRECT"
@@ -61,12 +67,33 @@ class AutoResolveAction(str, Enum):
 # Valid state transitions for tickets
 VALID_TRANSITIONS: dict[TicketStatus, list[TicketStatus]] = {
     TicketStatus.INBOX: [TicketStatus.TRIAGING, TicketStatus.TRIAGE_PENDING],
-    TicketStatus.TRIAGING: [TicketStatus.TRIAGE_PENDING, TicketStatus.ASSIGNED, TicketStatus.RESOLVED],
-    TicketStatus.TRIAGE_PENDING: [TicketStatus.ASSIGNED, TicketStatus.RESOLVED, TicketStatus.CLOSED],
-    TicketStatus.ASSIGNED: [TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED, TicketStatus.INBOX, TicketStatus.CLOSED],
-    TicketStatus.IN_PROGRESS: [TicketStatus.RESOLVED, TicketStatus.ASSIGNED, TicketStatus.INBOX, TicketStatus.CLOSED],
-    TicketStatus.RESOLVED: [TicketStatus.IN_PROGRESS, TicketStatus.CLOSED],  # Can reopen if needed
-    TicketStatus.CLOSED: [TicketStatus.INBOX], # Can reopen
+    TicketStatus.TRIAGING: [
+        TicketStatus.TRIAGE_PENDING,
+        TicketStatus.ASSIGNED,
+        TicketStatus.RESOLVED,
+    ],
+    TicketStatus.TRIAGE_PENDING: [
+        TicketStatus.ASSIGNED,
+        TicketStatus.RESOLVED,
+        TicketStatus.CLOSED,
+    ],
+    TicketStatus.ASSIGNED: [
+        TicketStatus.IN_PROGRESS,
+        TicketStatus.RESOLVED,
+        TicketStatus.INBOX,
+        TicketStatus.CLOSED,
+    ],
+    TicketStatus.IN_PROGRESS: [
+        TicketStatus.RESOLVED,
+        TicketStatus.ASSIGNED,
+        TicketStatus.INBOX,
+        TicketStatus.CLOSED,
+    ],
+    TicketStatus.RESOLVED: [
+        TicketStatus.IN_PROGRESS,
+        TicketStatus.CLOSED,
+    ],  # Can reopen if needed
+    TicketStatus.CLOSED: [TicketStatus.INBOX],  # Can reopen
 }
 
 

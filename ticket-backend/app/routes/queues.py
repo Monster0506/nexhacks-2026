@@ -15,8 +15,10 @@ router = APIRouter(prefix="/api/queues", tags=["queues"])
 
 # Request/Response Models
 
+
 class MoveTicketRequest(BaseModel):
     """Request to move a ticket between queues."""
+
     ticket_id: str
     from_queue: QueueType
     to_queue: QueueType
@@ -26,6 +28,7 @@ class MoveTicketRequest(BaseModel):
 
 class DequeueResponse(BaseModel):
     """Response after dequeuing a ticket."""
+
     ticket_id: Optional[str]
     ticket: Optional[dict[str, Any]]
     queue: str
@@ -33,6 +36,7 @@ class DequeueResponse(BaseModel):
 
 class QueueStatsResponse(BaseModel):
     """Response for queue statistics."""
+
     queue: str
     count: int
     avg_wait_time_seconds: float
@@ -42,18 +46,21 @@ class QueueStatsResponse(BaseModel):
 
 class AllQueuesResponse(BaseModel):
     """Response for all queue statistics."""
+
     queues: list[dict[str, Any]]
     total_tickets: int
 
 
 class QueueDetailsResponse(BaseModel):
     """Response for detailed queue information."""
+
     queue: str
     stats: dict[str, Any]
     tickets: list[dict[str, Any]]
 
 
 # Endpoints
+
 
 @router.get("", response_model=AllQueuesResponse)
 async def list_all_queues():
@@ -146,8 +153,7 @@ async def move_ticket(
     current_queue = queue_manager.get_ticket_queue(request.ticket_id)
     if current_queue != request.from_queue:
         raise HTTPException(
-            status_code=400,
-            detail=f"Ticket is not in {request.from_queue.value} queue"
+            status_code=400, detail=f"Ticket is not in {request.from_queue.value} queue"
         )
 
     try:
@@ -209,14 +215,16 @@ async def peek_queue(
     for i, tid in enumerate(ticket_ids):
         ticket = ticket_repository.get(tid)
         if ticket:
-            tickets.append({
-                "position": i + 1,
-                "ticket_id": tid,
-                "priority": ticket.priority.value,
-                "category": ticket.category.value if ticket.category else None,
-                "created_at": ticket.created_at.isoformat(),
-                "sender": ticket.content.sender,
-            })
+            tickets.append(
+                {
+                    "position": i + 1,
+                    "ticket_id": tid,
+                    "priority": ticket.priority.value,
+                    "category": ticket.category.value if ticket.category else None,
+                    "created_at": ticket.created_at.isoformat(),
+                    "sender": ticket.content.sender,
+                }
+            )
 
     return {
         "queue": queue.value,
