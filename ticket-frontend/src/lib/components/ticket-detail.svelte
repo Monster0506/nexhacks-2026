@@ -49,11 +49,16 @@
   // Check if status changes should be disabled (for triage tickets)
   let isStatusLocked = $derived(ticket.status === 'triage_pending' || ticket.status === 'triaging');
   
+  // Check if coding agent is working on this ticket
+  let isCodingAgentWorking = $derived(
+    ticket.assignee?.id === 'coding-agent' && ticket.status === 'assigned'
+  );
+  
   // Only admin can delete tickets
   let canDelete = $derived($currentUser?.id === 'user-0');
   
-  // When ticket is in triage, admin can only delete (all other actions disabled)
-  let canEdit = $derived(!isStatusLocked);
+  // When ticket is in triage or coding agent is working, admin can only delete (all other actions disabled)
+  let canEdit = $derived(!isStatusLocked && !isCodingAgentWorking);
   
   const priorityStyles: Record<TicketPriority, string> = {
     critical: 'bg-destructive text-white',
@@ -301,6 +306,17 @@
                   {status.label}
                 </button>
               {/each}
+            </div>
+          </div>
+        {:else if isCodingAgentWorking}
+          <!-- Show locked status for coding agent tickets -->
+          <div class="flex items-center justify-between py-3 border-b border-border/50">
+            <span class="text-sm text-muted-foreground">Status</span>
+            <div class="text-xs px-2.5 py-1 rounded-md bg-purple-500/20 text-purple-500 flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Coding Agent (Locked)
             </div>
           </div>
         {:else}
