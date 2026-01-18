@@ -35,6 +35,9 @@ class EventPublisher:
                 "queue": ticket.current_queue.value,
                 "priority": ticket.priority.value,
                 "sender": ticket.content.sender,
+                "title": ticket.title,
+                "description": ticket.description,
+                "content": ticket.content.extract_body(),
             },
             ticket=ticket,
         )
