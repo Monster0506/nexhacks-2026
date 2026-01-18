@@ -86,7 +86,7 @@ export async function fetchTickets(filters?: {
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch tickets: ${response.statusText}`);
+    throw new Error(`Failed to Connect to Backend: ${response.statusText}`);
   }
 
   const data = await response.json();
